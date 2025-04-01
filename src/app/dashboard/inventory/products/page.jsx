@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../../components/dashboardlayout';
-import Barcode from 'react-barcode'; 
+import Barcode from 'react-barcode';
+import { BrowserMultiFormatReader, NotFoundException } from '@zxing/browser';
 
 function InventoryPage() {
   const [showAddProductForm, setShowAddProductForm] = useState(false);
@@ -41,16 +42,8 @@ function InventoryPage() {
 
   const categories = [...new Set(products.map(product => product.category))];
 
-  const generateUniqueSku = () => {
-    let newSku;
-    do {
-      newSku = String(Math.floor(10000000 + Math.random() * 90000000));
-    } while (products.some(p => p.sku === newSku));
-    return newSku;
-  };
-
   const handleAddProduct = (newProduct) => {
-    setProducts([...products, { ...newProduct, id: products.length + 1, sku: generateUniqueSku() }]);
+    setProducts([...products, { ...newProduct, id: products.length + 1 }]);
     setShowAddProductForm(false);
   };
 
@@ -60,7 +53,6 @@ function InventoryPage() {
     setShowUpdateStockForm(false);
   };
 
-  // New state for the update form
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredOptions, setFilteredOptions] = useState([]);
 
@@ -79,6 +71,47 @@ function InventoryPage() {
     setSearchTerm(product.name);
     setFilteredOptions([]);
   };
+
+  const [isScanning, setIsScanning] = useState(false);
+  const [scannedBarcode, setScannedBarcode] = useState('');
+  const videoRef = useRef(null);
+  const codeReader = useRef(null);
+
+  const isMobile = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
+  useEffect(() => {
+    if (isScanning && videoRef.current && isMobile()) {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const initReader = async () => {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            codeReader.current = new BrowserMultiFormatReader();
+            codeReader.current.decodeFromInputVideoDevice(undefined, videoRef.current, (result, err) => {
+              if (result) {
+                setScannedBarcode(result.text);
+                setIsScanning(false);
+              }
+              if (err && !(err instanceof NotFoundException)) {
+                console.error(err);
+              }
+            });
+          } catch (error) {
+            console.error('Camera access error:', error);
+            setIsScanning(false);
+          }
+        };
+        initReader();
+      } else {
+        console.error('Camera not supported');
+        setIsScanning(false);
+      }
+    } else if (codeReader.current) {
+      codeReader.current.reset();
+      codeReader.current = null;
+    }
+  }, [isScanning]);
 
   return (
     <DashboardLayout>
@@ -115,25 +148,58 @@ function InventoryPage() {
           {showAddProductForm && (
             <div className="bg-white border border-black rounded-xl p-4 col-span-1">
               <h2 className="text-lg font-semibold mb-4 text-center">Add Product</h2>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleAddProduct({
-                  name: e.target.productName.value,
-                  category: e.target.category.value,
-                  stock: parseInt(e.target.stockQuantity.value),
-                  unitPrice: parseFloat(e.target.unitPrice.value),
-                  status: 'active',
-                });
-              }}>
-                <input type="text" name="productName" placeholder="Product Name" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }} />
-                <select name="category" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }}>
-                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-                <input type="number" name="stockQuantity" placeholder="Stock Quantity" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }} />
-                <input type="number" name="unitPrice" placeholder="Unit Price" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }} />
-                <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">Submit</button>
-                <button type="button" className="w-full p-2 bg-gray-300 text-black rounded mt-2" onClick={() => setShowAddProductForm(false)}>Cancel</button>
-              </form>
+              <div className="flex justify-around mb-4">
+                <button className={`p-2 border rounded ${!isScanning ? 'bg-blue-500 text-white' : 'bg-gray-300'}`} onClick={() => setIsScanning(false)}>Manual</button>
+                {isMobile() && <button className={`p-2 border rounded ${isScanning ? 'bg-blue-500 text-white' : 'bg-gray-300'}`} onClick={() => setIsScanning(true)}>Scan Barcode</button>}
+              </div>
+              {isScanning && isMobile() ? (
+                <div className="text-center">
+                  <video ref={videoRef} className="w-full" />
+                  {scannedBarcode && <p>Scanned Barcode: {scannedBarcode}</p>}
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    handleAddProduct({
+                      name: e.target.productName.value,
+                      category: e.target.category.value,
+                      stock: parseInt(e.target.stockQuantity.value),
+                      unitPrice: parseFloat(e.target.unitPrice.value),
+                      status: 'active',
+                      sku: scannedBarcode,
+                    });
+                  }}>
+                    <input type="text" name="productName" placeholder="Product Name" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }} />
+                    <select name="category" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }}>
+                      {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    </select>
+                    <input type="number" name="stockQuantity" placeholder="Stock Quantity" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }} />
+                    <input type="number" name="unitPrice" placeholder="Unit Price" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }} />
+                    <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">Submit</button>
+                    <button type="button" className="w-full p-2 bg-gray-300 text-black rounded mt-2" onClick={() => setShowAddProductForm(false)}>Cancel</button>
+                  </form>
+                </div>
+              ) : (
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAddProduct({
+                    name: e.target.productName.value,
+                    category: e.target.category.value,
+                    stock: parseInt(e.target.stockQuantity.value),
+                    unitPrice: parseFloat(e.target.unitPrice.value),
+                    status: 'active',
+                    sku: e.target.sku.value,
+                  });
+                }}>
+                  <input type="text" name="productName" placeholder="Product Name" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }} />
+                  <select name="category" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }}>
+                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </select>
+                  <input type="number" name="stockQuantity" placeholder="Stock Quantity" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }} />
+                  <input type="text" name="sku" placeholder="SKU" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }} />
+                  <input type="number" name="unitPrice" placeholder="Unit Price" className="w-full mx-auto p-2 border rounded mb-2 text-center" style={{ width: 'calc(100%)' }} />
+                  <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">Submit</button>
+                  <button type="button" className="w-full p-2 bg-gray-300 text-black rounded mt-2" onClick={() => setShowAddProductForm(false)}>Cancel</button>
+                </form>
+              )}
             </div>
           )}
           {showUpdateStockForm && (
@@ -151,21 +217,21 @@ function InventoryPage() {
                   });
                 }
               }}>
-                <input 
-                  type="text" 
-                  name="productName" 
-                  placeholder="Product ID/Name" 
-                  value={searchTerm} 
-                  onChange={handleSearchChange} 
-                  className="w-full mx-auto p-2 border rounded mb-2 text-center" 
-                  style={{ width: 'calc(100%)' }} 
+                <input
+                  type="text"
+                  name="productName"
+                  placeholder="Product ID/Name"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="w-full mx-auto p-2 border rounded mb-2 text-center"
+                  style={{ width: 'calc(100%)' }}
                 />
                 {filteredOptions.length > 0 && (
                   <ul className="border border-gray-300 rounded bg-white absolute z-10">
                     {filteredOptions.map(product => (
-                      <li 
-                        key={product.id} 
-                        className="p-2 cursor-pointer hover:bg-gray-200" 
+                      <li
+                        key={product.id}
+                        className="p-2 cursor-pointer hover:bg-gray-200"
                         onClick={() => handleSelectProduct(product)}
                       >
                         {product.name}
@@ -238,30 +304,30 @@ function InventoryPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
-          <div className="flex justify-center mt-4">
-            <button disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)} className="p-2 border rounded">
-              &lt;
-            </button>
-            <div className="flex space-x-2">
-              {pageNumbers.map((number) => (
-                <button
-                  key={number}
-                  onClick={() => handlePageChange(number)}
-                  className={`p-2 border rounded ${currentPage === number ? 'bg-blue-500 text-white' : 'bg-white'}`}
-                >
-                  {number}
-                </button>
-              ))}
+            </table>
+            <div className="flex justify-center mt-4">
+              <button disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)} className="p-2 border rounded">
+                &lt;
+              </button>
+              <div className="flex space-x-2">
+                {pageNumbers.map((number) => (
+                  <button
+                    key={number}
+                    onClick={() => handlePageChange(number)}
+                    className={`p-2 border rounded ${currentPage === number ? 'bg-blue-500 text-white' : 'bg-white'}`}
+                  >
+                    {number}
+                  </button>
+                ))}
+              </div>
+              <button disabled={currentPage === pageNumbers[pageNumbers.length - 1]} onClick={() => handlePageChange(currentPage + 1)} className="p-2 border rounded">
+                &gt;
+              </button>
             </div>
-            <button disabled={currentPage === pageNumbers[pageNumbers.length - 1]} onClick={() => handlePageChange(currentPage + 1)} className="p-2 border rounded">
-              &gt;
-            </button>
           </div>
         </div>
-      </div>
-    </DashboardLayout>
-  );
-}
+      </DashboardLayout>
+    );
+  }
 
-export default InventoryPage;
+  export default InventoryPage;
