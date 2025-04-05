@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import DashboardLayout from '../../components/dashboardlayout';
 import { BrowserBarcodeReader } from '@zxing/library';
 
@@ -31,6 +31,18 @@ const CreateBill = () => {
     { id: 14, name: 'Novel', price: 12.00, sku: 'NVL-006' },
     { id: 15, name: 'Dress', price: 80.00, sku: 'DRS-008' },
   ];
+
+  useEffect(() => {
+    if (videoRef.current) {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then((stream) => {
+          videoRef.current.srcObject = stream;
+        })
+        .catch((error) => {
+          console.error("Error accessing camera:", error);
+        });
+    }
+  }, []);
 
   const handleScanButtonClick = () => {
     const reader = new BrowserBarcodeReader();
@@ -188,7 +200,7 @@ const CreateBill = () => {
           <h2 className="text-xl font-semibold mb-4">Add Products</h2>
 
           <div style={{ position: 'relative', width: '100%', height: '100px', marginBottom: '10px' }}>
-            <video ref={videoRef} style={{ width: '100%', height: '100%' }} />
+            <video ref={videoRef} style={{ width: '100%', height: '100%' }} autoPlay playsInline/>
             <div
               style={{
                 position: 'absolute',
