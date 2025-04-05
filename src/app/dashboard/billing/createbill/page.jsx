@@ -18,21 +18,21 @@ const CreateBill = () => {
   const [isScanning, setIsScanning] = useState(false);
 
   const productList = [
-    { id: 1, name: 'Laptop', price: 1200.00, sku: 'LAP-001', barcode: '1234567890123' },
-    { id: 2, name: 'Mouse', price: 25.00, sku: 'MOU-007', barcode: '9876543210987' },
-    { id: 3, name: 'Keyboard', price: 50.00, sku: 'TBK-009', barcode: '1122334455667' },
-    { id: 4, name: 'Monitor', price: 300.00, sku: 'MON-004', barcode: '7788990011223' },
-    { id: 5, name: 'Headphones', price: 80.00, sku: 'HDP-004', barcode: '3322110099887' },
-    { id: 6, name: 'Laptop Charger', price: 60.00, sku: 'LCH-006', barcode: '4455667788990' },
-    { id: 7, name: 'Wireless Mouse', price: 35.00, sku: 'WMOU-008', barcode: '0099887766554' },
-    { id: 8, name: 'Mechanical Keyboard', price: 100.00, sku: 'MKB-010', barcode: '6677889900112' },
-    { id: 9, name: 'Curved Monitor', price: 450.00, sku: 'CMON-011', barcode: '2233445566778' },
-    { id: 10, name: 'Noise-Cancelling Headphones', price: 150.00, sku: 'NCH-012', barcode: '8899001122334' },
-    { id: 11, name: 'T-Shirt', price: 20.00, sku: 'TSH-002', barcode: '5566778899001' },
-    { id: 12, name: 'Book', price: 15.00, sku: 'BOK-003', barcode: '1100998877665' },
-    { id: 13, name: 'Jeans', price: 60.00, sku: 'JNS-005', barcode: '9900112233445' },
-    { id: 14, name: 'Novel', price: 12.00, sku: 'NVL-006', barcode: '3344556677889' },
-    { id: 15, name: 'Dress', price: 80.00, sku: 'DRS-008', barcode: '7788990011223' },
+    { id: 1, name: 'Laptop', price: 1200.00, sku: 'LAP-001' },
+    { id: 2, name: 'Mouse', price: 25.00, sku: 'MOU-007' },
+    { id: 3, name: 'Keyboard', price: 50.00, sku: 'TBK-009' },
+    { id: 4, name: 'Monitor', price: 300.00, sku: 'MON-004' },
+    { id: 5, name: 'Headphones', price: 80.00, sku: 'HDP-004' },
+    { id: 6, name: 'Laptop Charger', price: 60.00, sku: 'LCH-006' },
+    { id: 7, name: 'Wireless Mouse', price: 35.00, sku: 'WMOU-008' },
+    { id: 8, name: 'Mechanical Keyboard', price: 100.00, sku: 'MKB-010' },
+    { id: 9, name: 'Curved Monitor', price: 450.00, sku: 'CMON-011' },
+    { id: 10, name: 'Noise-Cancelling Headphones', price: 150.00, sku: 'NCH-012' },
+    { id: 11, name: 'T-Shirt', price: 20.00, sku: 'TSH-002' },
+    { id: 12, name: 'Book', price: 15.00, sku: 'BOK-003' },
+    { id: 13, name: 'Jeans', price: 60.00, sku: 'JNS-005' },
+    { id: 14, name: 'Novel', price: 12.00, sku: 'NVL-006' },
+    { id: 15, name: 'Dress', price: 80.00, sku: 'DRS-008' },
   ];
 
   useEffect(() => {
@@ -51,6 +51,9 @@ const CreateBill = () => {
               if (result) {
                 handleBarcodeScan(result.text);
                 setIsScanning(false);
+                if ("vibrate" in navigator) {
+                  navigator.vibrate(500);
+                }
               }
             });
           }
@@ -65,7 +68,7 @@ const CreateBill = () => {
   }, [isMobile, isScanning]);
 
   const handleBarcodeScan = (barcode) => {
-    const product = productList.find((p) => p.sku === barcode); // Changed from barcode to SKU
+    const product = productList.find((p) => p.sku === barcode);
     if (product) {
       setSelectedProduct(product);
       setProductSearch(product.name);
