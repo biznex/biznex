@@ -199,7 +199,7 @@ const CreateBill = () => {
         <div className="w-full md:w-1/4 p-4">
           <h2 className="text-xl font-semibold mb-4">Add Products</h2>
 
-          <div style={{ position: 'relative', width: '100%', height: '100px', marginBottom: '10px' }}>
+          <div style={{ position: 'relative', width: '100%', height: '200px', marginBottom: '10px' }}> {/* Increased height */}
             <video ref={videoRef} style={{ width: '100%', height: '100%' }} autoPlay playsInline/>
             <div
               style={{
