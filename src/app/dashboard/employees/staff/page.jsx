@@ -7,7 +7,7 @@ const EmployeesStaff = () => {
   const [staff, setStaff] = useState([
     { id: 1, name: 'John Doe', joinDate: '2023-01-15', role: 'Manager', bankAccountNo: '1234567890', bankName: 'Example Bank', bankIfsc: 'EXMP0001234', salary: 5000, email: 'john.doe@example.com', phone: '123-456-7890' },
     { id: 2, name: 'Jane Smith', joinDate: '2023-03-01', role: 'Developer', bankAccountNo: '9876543210', bankName: 'Another Bank', bankIfsc: 'ANOT0005678', salary: 4000, email: 'jane.smith@example.com', phone: '987-654-3210' },
-    { id: 3, name: 'Bob Johnson', joinDate: '2023-05-10', role: 'Designer', bankAccountNo: '5551234567', bankName: 'Third Bank', bankIfsc: 'THRD0009012', salary: 3500, email: 'bob.johnson@example.com', phone: '555-123-4567' },
+    { id: 3, name: 'Antony Thomas', joinDate: '2023-05-10', role: 'Designer', bankAccountNo: '5551234567', bankName: 'Third Bank', bankIfsc: 'THRD0009012', salary: 3500, email: 'bob.johnson@example.com', phone: '555-123-4567' },
     // Add more placeholder data as needed
   ]);
 
