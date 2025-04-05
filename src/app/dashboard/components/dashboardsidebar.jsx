@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { Home, FileText, CreditCard, Boxes, LogOut, Banknote, ArrowLeftRight, IndianRupee, ChevronDown, Package, ChartNoAxesGantt, Users, Briefcase, File } from 'lucide-react';
 
 function DashboardSidebar() {
@@ -9,13 +10,43 @@ function DashboardSidebar() {
   const [showBillingSubMenu, setShowBillingSubMenu] = useState(false);
   const [showJobsSubMenu, setShowJobsSubMenu] = useState(false);
   const [showDocumentsSubMenu, setShowDocumentsSubMenu] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setIsClient(true);
+    if (pathname.startsWith('/dashboard/finance')) {
+      setShowFinanceSubMenu(true);
+    }
+    if (pathname.startsWith('/dashboard/employees')) {
+      setShowEmployeesSubMenu(true);
+    }
+    if (pathname.startsWith('/dashboard/inventory')) {
+      setShowInventorySubMenu(true);
+    }
+    if (pathname.startsWith('/dashboard/billing')) {
+      setShowBillingSubMenu(true);
+    }
+    if (pathname.startsWith('/dashboard/jobs')) {
+      setShowJobsSubMenu(true);
+    }
+    if (pathname.startsWith('/dashboard/documents')) {
+      setShowDocumentsSubMenu(true);
+    }
+  }, [pathname]);
+
+  const isActive = (path) => {
+    return pathname === path;
+  };
 
   return (
-    <div className="flex flex-col h-full font-sans">
+    <div className={`flex flex-col h-full font-sans ${isClient ? 'overflow-y-auto' : ''}`}>
       <ul className="flex-grow">
         <li>
           <Link href="/dashboard">
-            <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit mt-12 md:mt-4">
+            <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit mt-12 md:mt-4 ${isActive('/dashboard') ? 'bg-[#E0E0E0]' : ''}`}>
               <Home size={18} className="shrink-0" />
               <span>Home</span>
             </div>
@@ -34,7 +65,7 @@ function DashboardSidebar() {
             <ul className="pl-6">
               <li>
                 <Link href="/dashboard/finance/overview">
-                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/finance/overview') ? 'bg-[#E0E0E0]' : ''}`}>
                     <CreditCard size={18} className="shrink-0" />
                     <span>Overview</span>
                   </div>
@@ -42,7 +73,7 @@ function DashboardSidebar() {
               </li>
               <li>
                 <Link href="/dashboard/finance/payments">
-                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/finance/payments') ? 'bg-[#E0E0E0]' : ''}`}>
                     <Banknote size={18} className="shrink-0" />
                     <span>Payments</span>
                   </div>
@@ -50,7 +81,7 @@ function DashboardSidebar() {
               </li>
               <li>
                 <Link href="/dashboard/finance/transactions">
-                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/finance/transactions') ? 'bg-[#E0E0E0]' : ''}`}>
                     <ArrowLeftRight size={18} className="shrink-0" />
                     <span>Transactions</span>
                   </div>
@@ -58,7 +89,7 @@ function DashboardSidebar() {
               </li>
               <li>
                 <Link href="/dashboard/finance/salary">
-                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/finance/salary') ? 'bg-[#E0E0E0]' : ''}`}>
                     <IndianRupee size={18} className="shrink-0" />
                     <span>Salary</span>
                   </div>
@@ -80,7 +111,7 @@ function DashboardSidebar() {
             <ul className="pl-6">
               <li>
                 <Link href="/dashboard/inventory/products">
-                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/inventory/products') ? 'bg-[#E0E0E0]' : ''}`}>
                     <Package size={18} className="shrink-0" />
                     <span>Products</span>
                   </div>
@@ -88,7 +119,7 @@ function DashboardSidebar() {
               </li>
               <li>
                 <Link href="/dashboard/inventory/categories">
-                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/inventory/categories') ? 'bg-[#E0E0E0]' : ''}`}>
                     <ChartNoAxesGantt size={18} className="shrink-0" />
                     <span>Categories</span>
                   </div>
@@ -110,7 +141,7 @@ function DashboardSidebar() {
             <ul className="pl-6">
               <li>
                 <Link href="/dashboard/employees/staff">
-                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/employees/staff') ? 'bg-[#E0E0E0]' : ''}`}>
                     <Users size={18} className="shrink-0" />
                     <span>Staff</span>
                   </div>
@@ -132,7 +163,7 @@ function DashboardSidebar() {
             <ul className="pl-6">
               <li>
                 <Link href="/dashboard/jobs/joblistings">
-                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/jobs/joblistings') ? 'bg-[#E0E0E0]' : ''}`}>
                     <Briefcase size={18} className="shrink-0" />
                     <span>Job Listings</span>
                   </div>
@@ -154,20 +185,20 @@ function DashboardSidebar() {
             <ul className="pl-6">
               <li>
                 <Link href="/dashboard/billing/createinvoice">
-                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/billing/createinvoice') ? 'bg-[#E0E0E0]' : ''}`}>
                     <FileText size={18} className="shrink-0" />
                     <span>Create Invoice</span>
                   </div>
                 </Link>
               </li>
-                <li>
-                  <Link href="/dashboard/billing/createbill">
-                    <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit">
-                      <FileText size={18} className="shrink-0" />
-                      <span>Create Bill</span>
-                    </div>
-                  </Link>
-                </li>
+              <li>
+                <Link href="/dashboard/billing/createbill">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/billing/createbill') ? 'bg-[#E0E0E0]' : ''}`}>
+                    <FileText size={18} className="shrink-0" />
+                    <span>Create Bill</span>
+                  </div>
+                </Link>
+              </li>
             </ul>
           )}
         </li>
@@ -184,7 +215,7 @@ function DashboardSidebar() {
             <ul className="pl-6">
               <li>
                 <Link href="/dashboard/documents/myfiles">
-                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/documents/myfiles') ? 'bg-[#E0E0E0]' : ''}`}>
                     <File size={18} className="shrink-0" />
                     <span>My Files</span>
                   </div>

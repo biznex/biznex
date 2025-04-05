@@ -1,5 +1,3 @@
-// src/app/dashboard/employees/staff/page.jsx
-
 "use client";
 
 import React, { useState } from "react";
@@ -7,9 +5,9 @@ import DashboardLayout from '../../components/dashboardlayout';
 
 const EmployeesStaff = () => {
   const [staff, setStaff] = useState([
-    { id: 1, name: 'John Doe', joinDate: '2023-01-15', role: 'Manager', salary: 5000, email: 'john.doe@example.com', phone: '123-456-7890' },
-    { id: 2, name: 'Jane Smith', joinDate: '2023-03-01', role: 'Developer', salary: 4000, email: 'jane.smith@example.com', phone: '987-654-3210' },
-    { id: 3, name: 'Bob Johnson', joinDate: '2023-05-10', role: 'Designer', salary: 3500, email: 'bob.johnson@example.com', phone: '555-123-4567' },
+    { id: 1, name: 'John Doe', joinDate: '2023-01-15', role: 'Manager', bankAccountNo: '1234567890', bankName: 'Example Bank', bankIfsc: 'EXMP0001234', salary: 5000, email: 'john.doe@example.com', phone: '123-456-7890' },
+    { id: 2, name: 'Jane Smith', joinDate: '2023-03-01', role: 'Developer', bankAccountNo: '9876543210', bankName: 'Another Bank', bankIfsc: 'ANOT0005678', salary: 4000, email: 'jane.smith@example.com', phone: '987-654-3210' },
+    { id: 3, name: 'Bob Johnson', joinDate: '2023-05-10', role: 'Designer', bankAccountNo: '5551234567', bankName: 'Third Bank', bankIfsc: 'THRD0009012', salary: 3500, email: 'bob.johnson@example.com', phone: '555-123-4567' },
     // Add more placeholder data as needed
   ]);
 
@@ -17,6 +15,9 @@ const EmployeesStaff = () => {
     name: '',
     joinDate: '',
     role: '',
+    bankAccountNo: '',
+    bankName: '',
+    bankIfsc: '',
     salary: '',
     email: '',
     phone: '',
@@ -37,14 +38,14 @@ const EmployeesStaff = () => {
     } else {
       setStaff([...staff, { id: Date.now(), ...staffFormData }]);
     }
-    setStaffFormData({ name: '', joinDate: '', role: '', salary: '', email: '', phone: '' });
+    setStaffFormData({ name: '', joinDate: '', role: '', bankAccountNo: '', bankName: '', bankIfsc: '', salary: '', email: '', phone: '' });
   };
 
   const handleDeleteStaff = (id) => {
     setStaff(staff.filter((employee) => employee.id !== id));
     if (editingStaffId === id) {
       setEditingStaffId(null);
-      setStaffFormData({ name: '', joinDate: '', role: '', salary: '', email: '', phone: '' });
+      setStaffFormData({ name: '', joinDate: '', role: '', bankAccountNo: '', bankName: '', bankIfsc: '', salary: '', email: '', phone: '' });
     }
   };
 
@@ -54,6 +55,9 @@ const EmployeesStaff = () => {
       name: employee.name,
       joinDate: employee.joinDate,
       role: employee.role,
+      bankAccountNo: employee.bankAccountNo,
+      bankName: employee.bankName,
+      bankIfsc: employee.bankIfsc,
       salary: employee.salary.toString(),
       email: employee.email,
       phone: employee.phone,
@@ -75,6 +79,9 @@ const EmployeesStaff = () => {
                     <th className="border border-gray-300 p-2">Name</th>
                     <th className="border border-gray-300 p-2">Join Date</th>
                     <th className="border border-gray-300 p-2">Role</th>
+                    <th className="border border-gray-300 p-2">Bank Account No.</th>
+                    <th className="border border-gray-300 p-2">Bank Name</th>
+                    <th className="border border-gray-300 p-2">Bank IFSC</th>
                     <th className="border border-gray-300 p-2">Salary</th>
                     <th className="border border-gray-300 p-2">Email</th>
                     <th className="border border-gray-300 p-2">Phone</th>
@@ -88,6 +95,9 @@ const EmployeesStaff = () => {
                       <td className="border border-gray-300 p-2">{employee.name}</td>
                       <td className="border border-gray-300 p-2">{employee.joinDate}</td>
                       <td className="border border-gray-300 p-2">{employee.role}</td>
+                      <td className="border border-gray-300 p-2">{employee.bankAccountNo}</td>
+                      <td className="border border-gray-300 p-2">{employee.bankName}</td>
+                      <td className="border border-gray-300 p-2">{employee.bankIfsc}</td>
                       <td className="border border-gray-300 p-2">${employee.salary}</td>
                       <td className="border border-gray-300 p-2">{employee.email}</td>
                       <td className="border border-gray-300 p-2">{employee.phone}</td>
@@ -109,6 +119,9 @@ const EmployeesStaff = () => {
               <input type="text" name="name" value={staffFormData.name} onChange={handleStaffChange} placeholder="Name" className="p-2 border rounded text-[#2F2F2F]" />
               <input type="date" name="joinDate" value={staffFormData.joinDate} onChange={handleStaffChange} className="p-2 border rounded text-[#2F2F2F]" />
               <input type="text" name="role" value={staffFormData.role} onChange={handleStaffChange} placeholder="Role" className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="text" name="bankAccountNo" value={staffFormData.bankAccountNo} onChange={handleStaffChange} placeholder="Bank Account No." className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="text" name="bankName" value={staffFormData.bankName} onChange={handleStaffChange} placeholder="Bank Name" className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="text" name="bankIfsc" value={staffFormData.bankIfsc} onChange={handleStaffChange} placeholder="Bank IFSC" className="p-2 border rounded text-[#2F2F2F]" />
               <input type="number" name="salary" value={staffFormData.salary} onChange={handleStaffChange} placeholder="Salary" className="p-2 border rounded text-[#2F2F2F]" />
               <input type="email" name="email" value={staffFormData.email} onChange={handleStaffChange} placeholder="Email" className="p-2 border rounded text-[#2F2F2F]" />
               <input type="tel" name="phone" value={staffFormData.phone} onChange={handleStaffChange} placeholder="Phone" className="p-2 border rounded text-[#2F2F2F]" />
