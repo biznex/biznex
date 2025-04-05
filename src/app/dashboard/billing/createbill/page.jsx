@@ -217,7 +217,23 @@ const CreateBill = () => {
               Scan Barcode
             </button>
           )}
-          {isMobile && isScanning && <video ref={videoRef} style={{ width: '100%', height: 'auto', marginBottom: '10px' }} />}
+          {isMobile && isScanning && (
+            <div style={{ position: 'relative', width: '100%', height: '300px', marginBottom: '10px' }}>
+              <video ref={videoRef} style={{ width: '100%', height: '100%' }} />
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '5%',
+                  width: '90%',
+                  height: '2px',
+                  backgroundColor: 'red',
+                  transform: 'translateY(-50%)',
+                }}
+              />
+              <div style={{position: 'absolute', top: '2%', left: '2%', width: '96%', height: '96%', border: '2px solid white'}}/>
+            </div>
+          )}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2">Search Product:</label>
             <input
