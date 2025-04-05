@@ -65,7 +65,7 @@ const CreateBill = () => {
   }, [isMobile, isScanning]);
 
   const handleBarcodeScan = (barcode) => {
-    const product = productList.find((p) => p.barcode === barcode);
+    const product = productList.find((p) => p.sku === barcode); // Changed from barcode to SKU
     if (product) {
       setSelectedProduct(product);
       setProductSearch(product.name);
