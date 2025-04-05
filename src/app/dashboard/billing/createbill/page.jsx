@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import DashboardLayout from '../../components/dashboardlayout';
 import { BrowserBarcodeReader } from '@zxing/library';
 
@@ -13,9 +13,6 @@ const CreateBill = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [skuSearch, setSkuSearch] = useState('');
   const videoRef = useRef(null);
-  const [barcodeReader, setBarcodeReader] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
 
   const productList = [
     { id: 1, name: 'Laptop', price: 1200.00, sku: 'LAP-001' },
@@ -35,37 +32,18 @@ const CreateBill = () => {
     { id: 15, name: 'Dress', price: 80.00, sku: 'DRS-008' },
   ];
 
-  useEffect(() => {
-    setIsMobile(window.innerWidth <= 768);
-  }, []);
-
-  useEffect(() => {
-    if (isMobile && isScanning) {
-      const reader = new BrowserBarcodeReader();
-      setBarcodeReader(reader);
-      reader
-        .getVideoInputDevices()
-        .then((videoInputDevices) => {
-          if (videoInputDevices.length > 0) {
-            reader.decodeFromInputVideoDevice(undefined, videoRef.current, (result, err) => {
-              if (result) {
-                handleBarcodeScan(result.text);
-                setIsScanning(false);
-                if ("vibrate" in navigator) {
-                  navigator.vibrate(500);
-                }
-              }
-            });
-          }
-        })
-        .catch((err) => console.error(err));
-    }
-    return () => {
-      if (barcodeReader) {
-        barcodeReader.reset();
-      }
-    };
-  }, [isMobile, isScanning]);
+  const handleScanButtonClick = () => {
+    const reader = new BrowserBarcodeReader();
+    reader
+      .decodeFromInputVideoDevice(undefined, videoRef.current)
+      .then((result) => {
+        handleBarcodeScan(result.text);
+        if ("vibrate" in navigator) {
+          navigator.vibrate(500);
+        }
+      })
+      .catch((err) => console.error(err));
+  };
 
   const handleBarcodeScan = (barcode) => {
     const product = productList.find((p) => p.sku === barcode);
@@ -203,40 +181,34 @@ const CreateBill = () => {
     setBillItems(updatedItems);
   };
 
-  const handleScanButtonClick = () => {
-    setIsScanning(true);
-  };
-
   return (
     <DashboardLayout>
       <div className="flex flex-col md:flex-row-reverse w-full h-full">
         <div className="w-full md:w-1/4 p-4">
           <h2 className="text-xl font-semibold mb-4">Add Products</h2>
-          {isMobile && !isScanning && (
-            <button
-              onClick={handleScanButtonClick}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
-            >
-              Scan Barcode
-            </button>
-          )}
-          {isMobile && isScanning && (
-            <div style={{ position: 'relative', width: '100%', height: '300px', marginBottom: '10px' }}>
-              <video ref={videoRef} style={{ width: '100%', height: '100%' }} />
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '5%',
-                  width: '90%',
-                  height: '2px',
-                  backgroundColor: 'red',
-                  transform: 'translateY(-50%)',
-                }}
-              />
-              <div style={{position: 'absolute', top: '2%', left: '2%', width: '96%', height: '96%', border: '2px solid white'}}/>
-            </div>
-          )}
+
+          <div style={{ position: 'relative', width: '100%', height: '100px', marginBottom: '10px' }}>
+            <video ref={videoRef} style={{ width: '100%', height: '100%' }} />
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '5%',
+                width: '90%',
+                height: '2px',
+                backgroundColor: 'red',
+                transform: 'translateY(-50%)',
+              }}
+            />
+          </div>
+
+          <button
+            onClick={handleScanButtonClick}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+          >
+            Click to Scan
+          </button>
+
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2">Search Product:</label>
             <input
