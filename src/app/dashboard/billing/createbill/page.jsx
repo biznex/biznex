@@ -13,6 +13,8 @@ const CreateBill = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [skuSearch, setSkuSearch] = useState('');
   const videoRef = useRef(null);
+  const [productSearchFocused, setProductSearchFocused] = useState(false);
+  const [skuSearchFocused, setSkuSearchFocused] = useState(false);
 
   const productList = [
     { id: 1, name: 'Laptop', price: 1200.00, sku: 'LAP-001' },
@@ -82,6 +84,8 @@ const CreateBill = () => {
       setProductSearch('');
       setSkuSearch('');
       setFilteredProducts([]);
+      setProductSearchFocused(false);
+      setSkuSearchFocused(false);
     }
   };
 
@@ -185,12 +189,18 @@ const CreateBill = () => {
     setProductSearch(product.name);
     setSkuSearch(product.sku);
     setFilteredProducts([]);
+    setProductSearchFocused(false);
+    setSkuSearchFocused(false);
   };
 
   const handleDeleteItem = (index) => {
     const updatedItems = [...billItems];
     updatedItems.splice(index, 1);
     setBillItems(updatedItems);
+  };
+
+  const handleNewBill = () => {
+    setBillItems([]);
   };
 
   return (
@@ -227,9 +237,24 @@ const CreateBill = () => {
               type="text"
               value={productSearch}
               onChange={handleProductSearchChange}
+              onFocus={() => setProductSearchFocused(true)}
+              onBlur={() => setTimeout(() => setProductSearchFocused(false), 200)}
               className="w-full p-2 border rounded"
               placeholder="Enter product name"
             />
+            {productSearchFocused && filteredProducts.length > 0 && (
+              <ul className="border rounded mt-1 bg-white">
+                {filteredProducts.map(product => (
+                  <li
+                    key={product.id}
+                    onClick={() => handleProductSelect(product)}
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                  >
+                    {product.name} ({product.sku})
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2">Search SKU:</label>
@@ -237,10 +262,12 @@ const CreateBill = () => {
               type="text"
               value={skuSearch}
               onChange={handleSkuSearchChange}
+              onFocus={() => setSkuSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSkuSearchFocused(false), 200)}
               className="w-full p-2 border rounded"
               placeholder="Enter SKU"
             />
-            {filteredProducts.length > 0 && (
+            {skuSearchFocused && filteredProducts.length > 0 && (
               <ul className="border rounded mt-1 bg-white">
                 {filteredProducts.map(product => (
                   <li
@@ -313,9 +340,14 @@ const CreateBill = () => {
               </tfoot>
             </table>
           </div>
-          <button onClick={handlePrint} className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Print Bill
-          </button>
+          <div className="flex justify-start mt-4">
+            <button onClick={handlePrint} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">
+              Confirm & Print Bill
+            </button>
+            <button onClick={handleNewBill} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+              New Bill
+            </button>
+          </div>
         </div>
       </div>
     </DashboardLayout>
