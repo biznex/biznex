@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Home, FileText, CreditCard, Boxes, LogOut, Banknote, ArrowLeftRight, IndianRupee, ChevronDown, Package, ChartNoAxesGantt, Users, Briefcase, File } from 'lucide-react';
+import { Home, FileText, CreditCard, Boxes, LogOut, Banknote, ArrowLeftRight, IndianRupee, ChevronDown, Package, ChartNoAxesGantt, Users, Briefcase, File, Printer } from 'lucide-react';
 
 function DashboardSidebar() {
   const [showFinanceSubMenu, setShowFinanceSubMenu] = useState(false);
@@ -122,6 +122,14 @@ function DashboardSidebar() {
                   <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/inventory/categories') ? 'bg-[#E0E0E0]' : ''}`}>
                     <ChartNoAxesGantt size={18} className="shrink-0" />
                     <span>Categories</span>
+                  </div>
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard/inventory/printbarcode">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/inventory/printbarcode') ? 'bg-[#E0E0E0]' : ''}`}>
+                    <Printer size={18} className="shrink-0" />
+                    <span>Print Barcode</span>
                   </div>
                 </Link>
               </li>
