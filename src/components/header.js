@@ -1,11 +1,24 @@
 "use client";
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  //const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null; // Check if running in browser
+ // const jtoken = typeof window !== 'undefined' ? localStorage.getItem('jtoken') : null;
+  const [token, setToken] = useState(null);
+  const [jtoken, setJtoken] = useState(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (typeof window !== "undefined") {
+      setToken(localStorage.getItem("token"));
+      setJtoken(localStorage.getItem("jtoken"));
+    }
+  }, []);
 
   return (
     <header className="absolute top-0 left-0 w-full p-4 bg-transparent">
@@ -29,12 +42,53 @@ export default function Header() {
           <a href="#" className="text-white text-lg hover:text-gray-300">
             Services
           </a>
-          <button
-            onClick={() => router.push("/login")}
-            className="px-4 py-2 bg-[#F16416] text-white rounded-md hover:bg-[#d14b10] transition"
-          >
-            Login/Register
-          </button>
+          {isClient && ( // Only render this part on the client
+            token ? (
+              jtoken ? (
+                <button
+                  onClick={() => {
+                    router.push("/login");
+                    setIsOpen(false);
+                  }}
+                  className="w-full px-4 py-2 bg-[#F16416] text-white rounded-md hover:bg-[#d14b10] transition"
+                >
+                  Login/Register
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    router.push("/dashboard");
+                    setIsOpen(false);
+                  }}
+                  className="w-full px-4 py-2 bg-[#F16416] text-white rounded-md hover:bg-[#d14b10] transition"
+                >
+                  Dashboard
+                </button>
+              )
+            ) : (
+              jtoken ? (
+                <button
+                  onClick={() => {
+                    router.push("/jobdashboard");
+                    setIsOpen(false);
+                  }}
+                  className="w-full px-4 py-2 bg-[#F16416] text-white rounded-md hover:bg-[#d14b10] transition"
+                >
+                  Dashboard
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    router.push("/login");
+                    setIsOpen(false);
+                  }}
+                  className="w-full px-4 py-2 bg-[#F16416] text-white rounded-md hover:bg-[#d14b10] transition"
+                >
+                  Login/Register
+                </button>
+              )
+            )
+          )}
         </nav>
 
         {/* Mobile Menu Toggle */}
@@ -61,15 +115,53 @@ export default function Header() {
           <a href="#" className="block text-white text-lg mb-4">
             Services
           </a>
-          <button
-            onClick={() => {
-              router.push("/login");
-              setIsOpen(false);
-            }}
-            className="w-full px-4 py-2 bg-[#F16416] text-white rounded-md hover:bg-[#d14b10] transition"
-          >
-            Login/Register
-          </button>
+          
+          
+          {token ? (
+            jtoken ? (
+              <button
+                onClick={() => {
+                  router.push("/login");
+                  setIsOpen(false);
+                }}
+                className="w-full px-4 py-2 bg-[#F16416] text-white rounded-md hover:bg-[#d14b10] transition"
+              >
+                Login/Register
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  router.push("/dashboard");
+                  setIsOpen(false);
+                }}
+                className="w-full px-4 py-2 bg-[#F16416] text-white rounded-md hover:bg-[#d14b10] transition"
+              >
+                Dashboard
+              </button>
+            )
+          ) : (
+            jtoken ? (
+              <button
+                onClick={() => {
+                  router.push("/jobdashboard");
+                  setIsOpen(false);
+                }}
+                className="w-full px-4 py-2 bg-[#F16416] text-white rounded-md hover:bg-[#d14b10] transition"
+              >
+                Dashboard
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  router.push("/login");
+                  setIsOpen(false);
+                }}
+                className="w-full px-4 py-2 bg-[#F16416] text-white rounded-md hover:bg-[#d14b10] transition"
+              >
+                Login/Register
+              </button>
+            )
+          )}
         </div>
       )}
     </header>

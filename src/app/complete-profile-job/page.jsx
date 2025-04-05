@@ -4,6 +4,7 @@ import { useState } from "react";
 export default function JobAspirantProfile() {
   const [fullName, setFullName] = useState("");
   const [dob, setDob] = useState("");
+  const [address, setAddress] = useState("");
 
   return (
     <div className="relative flex justify-center items-center min-h-screen bg-transparent">
@@ -31,6 +32,15 @@ export default function JobAspirantProfile() {
               className="w-full px-3 py-2 border border-white bg-transparent text-white placeholder-white rounded-md focus:outline-none"
               value={dob}
               onChange={(e) => setDob(e.target.value)}
+            />
+
+            {/* Address */}
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-white bg-transparent text-white placeholder-white rounded-md focus:outline-none"
+              placeholder="Address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
             />
 
             {/* Orange Submit Button */}

@@ -146,7 +146,7 @@ const JobListings = () => {
                     <p className="text-sm"><strong>Location:</strong> {listing.location}</p>
                     <p className="text-sm"><strong>Type:</strong> {listing.type}</p>
                     <p className="text-sm"><strong>Work Type:</strong> {listing.workType}</p>
-                    <p className="text-sm"><strong>Salary:</strong> ${listing.salary}</p>
+                    <p className="text-sm"><strong>Salary per Month :</strong> ${listing.salary}</p>
                     <p className="mt-2 text-sm">{listing.description.substring(0, 100)}...</p>
                     <p className="mt-2 text-sm"><strong>Qualifications:</strong> {listing.qualifications.join(', ')}</p>
                   </div>
@@ -202,7 +202,7 @@ const JobListings = () => {
                 <option value="On-site">On-site</option>
                 <option value="Hybrid">Hybrid</option>
               </select>
-              <input type="number" name="salary" value={jobListingFormData.salary} onChange={handleJobListingChange} placeholder="Salary" className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="number" name="salary" value={jobListingFormData.salary} onChange={handleJobListingChange} placeholder="Salary per Month" className="p-2 border rounded text-[#2F2F2F]" />
               <textarea name="description" value={jobListingFormData.description} onChange={handleJobListingChange} placeholder="Description" className="p-2 border rounded text-[#2F2F2F]" />
               <input type="text" name="qualification-0" value={jobListingFormData.qualifications[0]} onChange={handleJobListingChange} placeholder="Qualification 1" className="p-2 border rounded text-[#2F2F2F]" />
               <input type="text" name="qualification-1" value={jobListingFormData.qualifications[1]} onChange={handleJobListingChange} placeholder="Qualification 2" className="p-2 border rounded text-[#2F2F2F]" />
