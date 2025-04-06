@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaUserCircle, FaBars } from 'react-icons/fa';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
@@ -83,6 +83,19 @@ export default function JobListingsPage() {
   const [salaryRange, setSalaryRange] = useState([0, 150000]);
   const [workTypeFilter, setWorkTypeFilter] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [showUserDataPopup, setShowUserDataPopup] = useState(false);
+  const [userData, setUserData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    resume: null,
+  });
+  const [resumeFileName, setResumeFileName] = useState("Choose File");
+  const modalRef = useRef(null);
+  const [applyJobPopup, setApplyJobPopup] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [canConfirm, setCanConfirm] = useState(false);
+  const [userDataError, setUserDataError] = useState(null);
 
   const uniqueLocations = [...new Set(jobListings.map((listing) => listing.location))];
 
@@ -130,6 +143,78 @@ export default function JobListingsPage() {
     }
   };
 
+  const handleUserDataChange = (e) => {
+    if (e.target.name === 'resume') {
+      setUserData({ ...userData, resume: e.target.files[0] });
+      if (e.target.files[0]) {
+        setResumeFileName(e.target.files[0].name);
+      } else {
+        setResumeFileName("Choose File");
+      }
+    } else {
+      setUserData({ ...userData, [e.target.name]: e.target.value });
+    }
+  };
+
+  const handleUserDataSubmit = (e) => {
+    if (!canConfirm) {
+      setUserDataError("Please fill in all fields.");
+      e.preventDefault();
+      return;
+    }
+
+    setUserDataError(null);
+    console.log('User data submitted:', userData);
+    setShowUserDataPopup(false);
+  };
+
+  const handleApplyJob = (job) => {
+    if (!userData.name || !userData.phone || !userData.email || !userData.resume) {
+      alert("Please fill up your data before applying for a job.");
+      return;
+    }
+    setSelectedJob(job);
+    setApplyJobPopup(true);
+  };
+
+  const confirmApplyJob = () => {
+    console.log("Applying for job:", selectedJob, "with data:", userData);
+    setApplyJobPopup(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        setShowUserDataPopup(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.keyCode === 27) {
+        setShowUserDataPopup(false);
+      }
+    };
+
+    if (showUserDataPopup) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showUserDataPopup]);
+
+  useEffect(() => {
+    setCanConfirm(
+      userData.name && userData.phone && userData.email && userData.resume
+    );
+  }, [userData]);
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FEFEFF] text-black w-full">
       <header className="p-4 border-b border-gray-300 flex justify-between items-center">
@@ -139,6 +224,9 @@ export default function JobListingsPage() {
           </button>
         </div>
         <div className="flex items-center">
+          <button className="mr-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={() => setShowUserDataPopup(true)}>
+            Fill Up My Data
+          </button>
           <h1 className="mr-2">Hi User!</h1>
           <div className="relative">
             <FaUserCircle className="text-2xl cursor-pointer" onClick={() => setShowLogout(!showLogout)} />
@@ -155,9 +243,7 @@ export default function JobListingsPage() {
       </header>
       <div className="flex flex-row w-full">
         <aside
-          className={`w-full md:w-64 p-4 border-r border-gray-300 ${
-            showFilters ? 'block' : 'hidden md:block'
-          }`}
+          className={`w-full md:w-64 p-4 border-r border-gray-300 ${showFilters ? 'block' : 'hidden md:block'}`}
         >
           <h2 className="text-lg font-semibold mb-4">Filters</h2>
           <div className="mb-4 relative">
@@ -277,11 +363,132 @@ export default function JobListingsPage() {
                     <li key={index} className="text-sm">{qualification}</li>
                   ))}
                 </ul>
+                <button
+                  onClick={() => handleApplyJob(listing)}
+                  className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
+                >
+                  Apply for Job
+                </button>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {showUserDataPopup && (
+        <div className="fixed inset-0 bg-transparent flex justify-center items-center">
+          <div ref={modalRef} className="bg-white p-6 rounded-md shadow-lg w-full max-w-md border border-black border-3">
+            <h2 className="text-lg font-semibold mb-4">Enter Your Data</h2>
+            {userDataError && (
+              <p className="text-red-500 mb-4">{userDataError}</p>
+            )}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Name</label>
+              <input
+                type="text"
+                name="name"
+                value={userData.name}
+                onChange={handleUserDataChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                required
+                onInvalid={(e) => e.target.setCustomValidity('Please enter your name.')}
+                onInput={(e) => e.target.setCustomValidity('')}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+              <input
+                type="tel"
+                name="phone"
+                value={userData.phone}
+                onChange={handleUserDataChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                required
+                onInvalid={(e) => e.target.setCustomValidity('Please enter your phone number.')}
+                onInput={(e) => e.target.setCustomValidity('')}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={userData.email}
+                onChange={handleUserDataChange}
+                className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                required
+                onInvalid={(e) => e.target.setCustomValidity('Please enter your email.')}
+                onInput={(e) => e.target.setCustomValidity('')}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Upload Resume (PDF only)</label>
+              <div className="relative">
+                <input
+                  type="file"
+                  name="resume"
+                  accept=".pdf"
+                  onChange={(e) => {
+                    if (e.target.files[0] && e.target.files[0].type !== 'application/pdf') {
+                      alert('Please upload a PDF file.');
+                      e.target.value = null;
+                      setResumeFileName("Choose File");
+                      setUserData({ ...userData, resume: null });
+                    } else {
+                      handleUserDataChange(e);
+                    }
+                  }}
+                  className="absolute inset-0 opacity-0"
+                  id="resumeUpload"
+                  required
+                  onInvalid={(e) => e.target.setCustomValidity('Please upload your resume (PDF).')}
+                  onInput={(e) => e.target.setCustomValidity('')}
+                />
+                <label htmlFor="resumeUpload" className="mt-1 p-2 border border-gray-300 rounded-md w-full cursor-pointer bg-gray-100 flex items-center">
+                  <span className="flex-grow">{resumeFileName}</span>
+                  <span className="ml-2 bg-blue-500 text-white px-3 py-1 rounded">Upload</span>
+                </label>
+              </div>
+            </div>
+            <div className="flex justify-between mt-4">
+              <button onClick={() => { setUserData({ name: '', phone: '', email: '', resume: null }); setResumeFileName("Choose File"); }} className="bg-gray-300 text-gray-800 px-4 py-2 rounded">
+                Clear
+              </button>
+              <div className="flex">
+                <button
+                  onClick={handleUserDataSubmit}
+                  className={`bg-blue-500 text-white px-4 py-2 rounded mr-2 ${
+                    canConfirm ? "" : "opacity-50 cursor-not-allowed"
+                  }`}
+                  disabled={!canConfirm}
+                >
+                  Confirm
+                </button>
+                <button onClick={() => setShowUserDataPopup(false)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {applyJobPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Are you sure?</h2>
+            <p>Are you sure you want to send your resume and details for the job: {selectedJob.title}?</p>
+            <div className="flex justify-end mt-4">
+              <button onClick={confirmApplyJob} className="bg-green-500 text-white px-4 py-2 rounded mr-2">
+                Yes, Apply
+              </button>
+              <button onClick={() => setApplyJobPopup(false)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
