@@ -1,7 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Home, FileText, CreditCard, Boxes, LogOut, Banknote, ArrowLeftRight, IndianRupee, ChevronDown, Package, ChartNoAxesGantt, Users, Briefcase, File, Printer } from 'lucide-react';
+import {
+  Home,
+  FileText,
+  CreditCard,
+  Boxes,
+  LogOut,
+  Banknote,
+  ArrowLeftRight,
+  IndianRupee,
+  ChevronDown,
+  Package,
+  ChartNoAxesGantt,
+  Users,
+  Briefcase,
+  File,
+  Printer,
+  Megaphone,
+  IdCard,
+} from 'lucide-react';
 
 function DashboardSidebar() {
   const [showFinanceSubMenu, setShowFinanceSubMenu] = useState(false);
@@ -10,6 +28,7 @@ function DashboardSidebar() {
   const [showBillingSubMenu, setShowBillingSubMenu] = useState(false);
   const [showJobsSubMenu, setShowJobsSubMenu] = useState(false);
   const [showDocumentsSubMenu, setShowDocumentsSubMenu] = useState(false);
+  const [showMarketingSubMenu, setShowMarketingSubMenu] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
   const router = useRouter();
@@ -34,6 +53,9 @@ function DashboardSidebar() {
     }
     if (pathname.startsWith('/dashboard/documents')) {
       setShowDocumentsSubMenu(true);
+    }
+    if (pathname.startsWith('/dashboard/marketing')) {
+      setShowMarketingSubMenu(true);
     }
   }, [pathname]);
 
@@ -226,6 +248,28 @@ function DashboardSidebar() {
                   <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/documents/myfiles') ? 'bg-[#E0E0E0]' : ''}`}>
                     <File size={18} className="shrink-0" />
                     <span>My Files</span>
+                  </div>
+                </Link>
+              </li>
+            </ul>
+          )}
+        </li>
+        <li>
+          <div
+            className="flex items-center space-x-3 p-2 rounded cursor-pointer hover:bg-[#F0F0F0] text-inherit"
+            onClick={() => setShowMarketingSubMenu(!showMarketingSubMenu)}
+          >
+            <Megaphone size={18} className="shrink-0" />
+            <span>Marketing</span>
+            <ChevronDown size={18} className="shrink-0" />
+          </div>
+          {showMarketingSubMenu && (
+            <ul className="pl-6">
+              <li>
+                <Link href="/dashboard/marketing/businesscard">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/marketing/businesscard') ? 'bg-[#E0E0E0]' : ''}`}>
+                    <IdCard size={18} className="shrink-0" />
+                    <span>Business Card</span>
                   </div>
                 </Link>
               </li>
