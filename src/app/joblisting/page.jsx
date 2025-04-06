@@ -83,7 +83,6 @@ export default function JobListingsPage() {
   const [salaryRange, setSalaryRange] = useState([0, 150000]);
   const [workTypeFilter, setWorkTypeFilter] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [showUserDataPopup, setShowUserDataPopup] = useState(false);
   const [userData, setUserData] = useState({
     name: '',
     phone: '',
@@ -96,6 +95,7 @@ export default function JobListingsPage() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [canConfirm, setCanConfirm] = useState(false);
   const [userDataError, setUserDataError] = useState(null);
+  const [applicationSent, setApplicationSent] = useState({});
 
   const uniqueLocations = [...new Set(jobListings.map((listing) => listing.location))];
 
@@ -156,58 +156,24 @@ export default function JobListingsPage() {
     }
   };
 
-  const handleUserDataSubmit = (e) => {
+  const handleUserDataSubmit = () => {
     if (!canConfirm) {
       setUserDataError("Please fill in all fields.");
-      e.preventDefault();
       return;
     }
 
     setUserDataError(null);
     console.log('User data submitted:', userData);
-    setShowUserDataPopup(false);
+    setApplyJobPopup(false);
+    setApplicationSent({ ...applicationSent, [selectedJob.id]: true });
   };
 
   const handleApplyJob = (job) => {
-    if (!userData.name || !userData.phone || !userData.email || !userData.resume) {
-      alert("Please fill up your data before applying for a job.");
-      return;
-    }
     setSelectedJob(job);
     setApplyJobPopup(true);
+    setUserData({ name: '', phone: '', email: '', resume: null });
+    setResumeFileName("Choose File");
   };
-
-  const confirmApplyJob = () => {
-    console.log("Applying for job:", selectedJob, "with data:", userData);
-    setApplyJobPopup(false);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        setShowUserDataPopup(false);
-      }
-    };
-
-    const handleKeyDown = (event) => {
-      if (event.keyCode === 27) {
-        setShowUserDataPopup(false);
-      }
-    };
-
-    if (showUserDataPopup) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleKeyDown);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [showUserDataPopup]);
 
   useEffect(() => {
     setCanConfirm(
@@ -224,9 +190,6 @@ export default function JobListingsPage() {
           </button>
         </div>
         <div className="flex items-center">
-          <button className="mr-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={() => setShowUserDataPopup(true)}>
-            Fill Up My Data
-          </button>
           <h1 className="mr-2">Hi User!</h1>
           <div className="relative">
             <FaUserCircle className="text-2xl cursor-pointer" onClick={() => setShowLogout(!showLogout)} />
@@ -365,9 +328,10 @@ export default function JobListingsPage() {
                 </ul>
                 <button
                   onClick={() => handleApplyJob(listing)}
-                  className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
+                  className={`mt-4 ${applicationSent[listing.id] ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500'} text-white px-4 py-2 rounded`}
+                  disabled={applicationSent[listing.id]}
                 >
-                  Apply for Job
+                  {applicationSent[listing.id] ? 'Application Sent' : 'Apply for Job'}
                 </button>
               </div>
             ))}
@@ -375,10 +339,10 @@ export default function JobListingsPage() {
         </div>
       </div>
 
-      {showUserDataPopup && (
+      {applyJobPopup && (
         <div className="fixed inset-0 bg-transparent flex justify-center items-center">
-          <div ref={modalRef} className="bg-white p-6 rounded-md shadow-lg w-full max-w-md border border-black border-3">
-            <h2 className="text-lg font-semibold mb-4">Enter Your Data</h2>
+          <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-md border border-black border-2">
+            <h2 className="text-lg font-semibold mb-4">Apply for {selectedJob?.title}</h2>
             {userDataError && (
               <p className="text-red-500 mb-4">{userDataError}</p>
             )}
@@ -450,39 +414,17 @@ export default function JobListingsPage() {
                 </label>
               </div>
             </div>
-            <div className="flex justify-between mt-4">
-              <button onClick={() => { setUserData({ name: '', phone: '', email: '', resume: null }); setResumeFileName("Choose File"); }} className="bg-gray-300 text-gray-800 px-4 py-2 rounded">
-                Clear
-              </button>
-              <div className="flex">
-                <button
-                  onClick={handleUserDataSubmit}
-                  className={`bg-blue-500 text-white px-4 py-2 rounded mr-2 ${
-                    canConfirm ? "" : "opacity-50 cursor-not-allowed"
-                  }`}
-                  disabled={!canConfirm}
-                >
-                  Confirm
-                </button>
-                <button onClick={() => setShowUserDataPopup(false)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {applyJobPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Are you sure?</h2>
-            <p>Are you sure you want to send your resume and details for the job: {selectedJob.title}?</p>
             <div className="flex justify-end mt-4">
-              <button onClick={confirmApplyJob} className="bg-green-500 text-white px-4 py-2 rounded mr-2">
-                Yes, Apply
+              <button
+                onClick={handleUserDataSubmit}
+                className={`bg-blue-500 text-white px-4 py-2 rounded ${
+                  canConfirm ? "" : "opacity-50 cursor-not-allowed"
+                }`}
+                disabled={!canConfirm}
+              >
+                Send My Details
               </button>
-              <button onClick={() => setApplyJobPopup(false)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded">
+              <button onClick={() => setApplyJobPopup(false)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded ml-2">
                 Cancel
               </button>
             </div>

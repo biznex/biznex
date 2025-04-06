@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaUserCircle, FaBars, FaShoppingCart, FaPlus, FaMinus } from 'react-icons/fa';
 
 const products = [
@@ -141,7 +141,6 @@ const products = [
   }
 ];
 
-
 export default function EcommercePage() {
   const [showLogout, setShowLogout] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -155,6 +154,7 @@ export default function EcommercePage() {
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const modalRef = useRef(null);
 
   const categories = [...new Set(products.map((product) => product.category))];
 
@@ -185,8 +185,6 @@ export default function EcommercePage() {
     return categoryMatch && priceMatch;
   });
 
-  const bestsellers = filteredProducts.filter((product) => product.bestseller);
-
   const addToCart = (product) => {
     const existingItem = cart.find((item) => item.id === product.id);
     if (existingItem) {
@@ -205,7 +203,12 @@ export default function EcommercePage() {
   };
 
   const decreaseQuantity = (productId) => {
-    setCart(cart.map((item) => item.id === productId && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item));
+    const item = cart.find((item) => item.id === productId);
+    if (item && item.quantity > 1) {
+      setCart(cart.map((cartItem) => cartItem.id === productId ? { ...cartItem, quantity: cartItem.quantity - 1 } : cartItem));
+    } else if (item && item.quantity === 1) {
+      removeFromCart(productId);
+    }
   };
 
   const showProductPopup = (product) => {
@@ -215,6 +218,28 @@ export default function EcommercePage() {
   const closeProductPopup = () => {
     setSelectedProduct(null);
   };
+
+  useEffect(() => {
+      const handleClickOutside = (event) => {
+          if (modalRef.current && !modalRef.current.contains(event.target)) {
+              closeProductPopup();
+          }
+      };
+
+      const handleKeyDown = (event) => {
+          if (event.keyCode === 27) {
+              closeProductPopup();
+          }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+          document.removeEventListener('mousedown', handleClickOutside);
+          document.removeEventListener('keydown', handleKeyDown);
+      };
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-black w-full">
@@ -239,8 +264,8 @@ export default function EcommercePage() {
                       <li key={item.id} className="flex justify-between items-center mb-2">
                         <span>{item.name} ({item.quantity})</span>
                         <div className="flex items-center">
-                          <button onClick={() => decreaseQuantity(item.id)} className="text-gray-600 p-1"><FaMinus/></button>
-                          <button onClick={() => increaseQuantity(item.id)} className="text-gray-600 p-1"><FaPlus/></button>
+                          <button onClick={() => decreaseQuantity(item.id)} className="text-gray-600 p-1"><FaMinus /></button>
+                          <button onClick={() => increaseQuantity(item.id)} className="text-gray-600 p-1"><FaPlus /></button>
                           <button onClick={() => removeFromCart(item.id)} className="text-red-600 p-1">Remove</button>
                         </div>
                       </li>
@@ -266,11 +291,11 @@ export default function EcommercePage() {
         </div>
       </header>
       <div className="flex flex-row w-full">
-      <aside
-  className={`fixed left-0 h-screen w-full md:w-64 p-4 border-r border-gray-300 ₹{
-    showFilters ? 'block' : 'hidden md:block'
-  } overflow-y-auto`}
->
+        <aside
+          className={`fixed left-0 h-screen w-full md:w-64 p-4 border-r border-gray-300 ${
+            showFilters ? 'block' : 'hidden md:block'
+          } overflow-y-auto`}
+        >
           <h2 className="text-lg font-semibold mb-4">Filters</h2>
           <div className="mb-4">
             <h3 className="font-semibold">Categories</h3>
@@ -331,28 +356,6 @@ export default function EcommercePage() {
           </div>
         </aside>
         <main className="flex-1 p-4 md:ml-64">
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold mb-4">Bestsellers</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {bestsellers.map((product) => (
-                <div key={product.id} className="border border-gray-300 p-4 rounded-md">
-                  <img src={product.imageUrl} alt={product.name} className="w-full h-32 object-cover mb-2" />
-                  <h3 className="font-semibold">{product.name}</h3>
-                  <p>₹{product.price}</p>
-                  {cart.find((item) => item.id === product.id) ? (
-                    <div className="flex items-center justify-center mt-2">
-                      <button onClick={() => decreaseQuantity(product.id)} className="text-gray-600 p-1"><FaMinus /></button>
-                      <span>{cart.find((item) => item.id === product.id).quantity}</span>
-                      <button onClick={() => increaseQuantity(product.id)} className="text-gray-600 p-1"><FaPlus /></button>
-                    </div>
-                  ) : (
-                    <button onClick={() => {addToCart(product);}} className="mt-2 bg-blue-500 text-white p-2 rounded w-full">Add to Cart</button>
-                  )}
-                  <button onClick={() => showProductPopup(product)} className="mt-2 bg-gray-200 text-black p-2 rounded w-full">View Details</button>
-                </div>
-              ))}
-            </div>
-          </section>
           {categories.map((category) => {
             const categoryProducts = filteredProducts.filter((product) => product.category === category);
             if (categoryProducts.length === 0) return null;
@@ -373,7 +376,7 @@ export default function EcommercePage() {
                           <button onClick={() => increaseQuantity(product.id)} className="text-gray-600 p-1"><FaPlus /></button>
                         </div>
                       ) : (
-                        <button onClick={() => {addToCart(product);}} className="mt-2 bg-blue-500 text-white p-2 rounded w-full">Add to Cart</button>
+                        <button onClick={() => { addToCart(product); }} className="mt-2 bg-blue-500 text-white p-2 rounded w-full">Add to Cart</button>
                       )}
                       <button onClick={() => showProductPopup(product)} className="mt-2 bg-gray-200 text-black p-2 rounded w-full">View Details</button>
                     </div>
@@ -385,8 +388,8 @@ export default function EcommercePage() {
         </main>
       </div>
       {selectedProduct && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-8 rounded-md w-96">
+        <div className="fixed top-0 left-0 w-full h-full bg-transparent flex justify-center items-center z-50">
+          <div ref={modalRef} className="bg-white p-8 rounded-md w-96 border border-black border-2">
             <h2 className="text-xl font-semibold mb-4">{selectedProduct.name}</h2>
             <img src={selectedProduct.imageUrl} alt={selectedProduct.name} className="w-full h-48 object-cover mb-4" />
             <p>{selectedProduct.description || "No description available."}</p>
@@ -397,7 +400,7 @@ export default function EcommercePage() {
                 <button onClick={() => increaseQuantity(selectedProduct.id)} className="text-gray-600 p-1"><FaPlus /></button>
               </div>
             ) : (
-              <button onClick={() => {addToCart(selectedProduct); closeProductPopup();}} className="mt-4 bg-blue-500 text-white p-2 rounded w-full">Add to Cart</button>
+              <button onClick={() => { addToCart(selectedProduct); closeProductPopup(); }} className="mt-4 bg-blue-500 text-white p-2 rounded w-full">Add to Cart</button>
             )}
             <button onClick={closeProductPopup} className="mt-2 bg-gray-200 text-black p-2 rounded w-full">Close</button>
           </div>
