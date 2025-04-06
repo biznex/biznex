@@ -1,0 +1,227 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import DashboardLayout from '../../components/dashboardlayout';
+import axios from 'axios';
+import { useRouter } from 'next/navigation'; // Import useRouter for navigation
+
+const EmployeesStaff = () => {
+  const [staff, setStaff] = useState([]); // State to hold employee data from API
+  const [staffFormData, setStaffFormData] = useState({
+    firstName: '',
+    lastName: '',
+    joinDate: '',
+    role: '',
+    bankAccountNo: '',
+    bankName: '',
+    bankIfsc: '',
+    salary: '',
+    email: '',
+    phone: '',
+  });
+  const [editingStaffId, setEditingStaffId] = useState(null);
+  const router = useRouter(); // Initialize router
+
+  // Function to fetch employee data from the API
+  const fetchStaffData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('https://biznex.onrender.com/employee/employees', { // Replace with your API endpoint
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
+      if (response.status >= 200 && response.status < 300) {
+        setStaff(response.data);
+      } else {
+        console.error('Failed to fetch employee data:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching employee data:', error);
+      if (error.response && error.response.status === 401) {
+        alert('Unauthorized access, please login again');
+        router.push('/login');
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchStaffData(); // Fetch data when component mounts
+  }, [router]); // Add router as dependency
+
+  const handleStaffChange = (e) => {
+    setStaffFormData({ ...staffFormData, [e.target.name]: e.target.value });
+  };
+
+  const handleAddStaff = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const apiEndpoint = editingStaffId
+        ? `https://biznex.onrender.com/employee/update/${editingStaffId}` // Update endpoint
+        : 'https://biznex.onrender.com/employee/add'; // Add endpoint
+
+      const method = editingStaffId ? 'put' : 'post'; // Use PUT for update, POST for add
+
+      const response = await axios({
+        method: method,
+        url: apiEndpoint,
+        data: staffFormData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
+
+      if (response.status >= 200 && response.status < 300) {
+        fetchStaffData(); // Refresh data after add/update
+        setStaffFormData({
+          firstName: '',
+          lastName: '',
+          joinDate: '',
+          role: '',
+          bankAccountNo: '',
+          bankName: '',
+          bankIfsc: '',
+          salary: '',
+          email: '',
+          phone: '',
+        });
+        setEditingStaffId(null); // Clear editing ID
+      } else {
+        console.error('Failed to add/update employee:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error adding/updating employee:', error);
+    }
+  };
+
+  const handleDeleteStaff = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.delete(`https://biznex.onrender.com/employee/delete/${id}`, { // Replace with delete endpoint
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
+      if (response.status >= 200 && response.status < 300) {
+        fetchStaffData(); // Refresh data after delete
+        if (editingStaffId === id) {
+          setEditingStaffId(null);
+          setStaffFormData({
+            firstName: '',
+            lastName: '',
+            joinDate: '',
+            role: '',
+            bankAccountNo: '',
+            bankName: '',
+            bankIfsc: '',
+            salary: '',
+            email: '',
+            phone: '',
+          });
+        }
+      } else {
+        console.error('Failed to delete employee:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+    }
+  };
+
+  const handleEditStaff = (employee) => {
+    setEditingStaffId(employee.id);
+    setStaffFormData({
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      joinDate: employee.joinDate,
+      role: employee.role,
+      bankAccountNo: employee.bankAccountNo,
+      bankName: employee.bankName,
+      bankIfsc: employee.bankIfsc,
+      salary: employee.salary.toString(),
+      email: employee.email,
+      phone: employee.phone,
+    });
+  };
+
+  return (
+    <DashboardLayout>
+      <div className="p-4 text-[#2F2F2F]">
+        <h1 className="text-lg font-semibold mb-4">Staff</h1>
+        <div className="flex flex-col lg:flex-row gap-4 w-full">
+          <div className="w-full lg:w-3/4 p-4 border border-[#2F2F2F] rounded-xl flex flex-col">
+            <h2 className="text-lg font-semibold mb-4">Employee Details</h2>
+            <div className="overflow-y-auto" style={{ maxHeight: '400px' }}>
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-300 p-2">Sl. No</th>
+                    <th className="border border-gray-300 p-2">First Name</th>
+                    <th className="border border-gray-300 p-2">Last Name</th>
+                    <th className="border border-gray-300 p-2">Join Date</th>
+                    <th className="border border-gray-300 p-2">Role</th>
+                    <th className="border border-gray-300 p-2">Bank Account No.</th>
+                    <th className="border border-gray-300 p-2">Bank Name</th>
+                    <th className="border border-gray-300 p-2">Bank IFSC</th>
+                    <th className="border border-gray-300 p-2">Salary</th>
+                    <th className="border border-gray-300 p-2">Email</th>
+                    <th className="border border-gray-300 p-2">Phone</th>
+                    <th className="border border-gray-300 p-2">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {staff.map((employee) => (
+                    <tr key={employee.id}>
+                      <td className="border border-gray-300 p-2">{employee.id}</td>
+                      <td className="border border-gray-300 p-2">{employee.firstName}</td>
+                      <td className="border border-gray-300 p-2">{employee.lastName}</td>
+                      <td className="border border-gray-300 p-2">{employee.joinDate}</td>
+                      <td className="border border-gray-300 p-2">{employee.role}</td>
+                      <td className="border border-gray-300 p-2">{employee.bankAccountNo}</td>
+                      <td className="border border-gray-300 p-2">{employee.bankName}</td>
+                      <td className="border border-gray-300 p-2">{employee.bankIfsc}</td>
+                      <td className="border border-gray-300 p-2">${employee.salary}</td>
+                      <td className="border border-gray-300 p-2">{employee.email}</td>
+                      <td className="border border-gray-300 p-2">{employee.phone}</td>
+                      <td className="border border-gray-300 p-2">
+                        <button onClick={() => handleEditStaff(employee)} className="text-blue-500 mr-2">Edit</button>
+                        <button onClick={() => handleDeleteStaff(employee.id)} className="text-red-500">Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="w-full lg:w-1/4 p-4 border border-[#2F2F2F] rounded-xl flex flex-col">
+            <h2 className="text-lg font-semibold mb-4">
+              {editingStaffId ? 'Update Employee' : 'Add Employee'}
+            </h2>
+            <div className="flex flex-col gap-2">
+              <input type="text" name="firstName" value={staffFormData.firstName} onChange={handleStaffChange} placeholder="First Name" className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="text" name="lastName" value={staffFormData.lastName} onChange={handleStaffChange} placeholder="Last Name" className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="date" name="joinDate" value={staffFormData.joinDate} onChange={handleStaffChange} className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="text" name="role" value={staffFormData.role} onChange={handleStaffChange} placeholder="Role" className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="text" name="bankAccountNo" value={staffFormData.bankAccountNo} onChange={handleStaffChange} placeholder="Bank Account No." className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="text" name="bankName" value={staffFormData.bankName} onChange={handleStaffChange} placeholder="Bank Name" className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="text" name="bankIfsc" value={staffFormData.bankIfsc} onChange={handleStaffChange} placeholder="Bank IFSC" className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="number" name="salary" value={staffFormData.salary} onChange={handleStaffChange} placeholder="Salary" className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="email" name="email" value={staffFormData.email} onChange={handleStaffChange} placeholder="Email" className="p-2 border rounded text-[#2F2F2F]" />
+              <input type="tel" name="phone" value={staffFormData.phone} onChange={handleStaffChange} placeholder="Phone" className="p-2 border rounded text-[#2F2F2F]" />
+              <button onClick={handleAddStaff} className="mt-2 p-2 bg-blue-500 text-white rounded">
+                {editingStaffId ? 'Update' : 'Add'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default EmployeesStaff;
