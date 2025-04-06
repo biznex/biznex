@@ -27,9 +27,15 @@ const BusinessCard = () => {
 
     useEffect(() => {
         if (businessInfo.website) {
+            let qrColor = "#000";
+            if (selectedTemplate === 'template3') {
+                qrColor = "#4CAF50";
+            } else if (selectedTemplate === 'template4') {
+                qrColor = "#fff";
+            }
             QRCode.toDataURL(businessInfo.website, {
                 color: {
-                    dark: "#000",
+                    dark: qrColor,
                     light: "#0000",
                 },
             }, (err, url) => {
@@ -40,7 +46,25 @@ const BusinessCard = () => {
                 setBusinessInfo(prev => ({ ...prev, qrCode: url }));
             });
         }
-    }, [businessInfo.website]);
+    }, [businessInfo.website, selectedTemplate]);
+
+    useEffect(() => {
+        const generateImages = async () => {
+            if (frontCardRef.current && backCardRef.current) {
+                try {
+                    const frontCanvas = await html2canvas(frontCardRef.current);
+                    const backCanvas = await html2canvas(backCardRef.current);
+
+                    setFrontImage(frontCanvas.toDataURL('image/png'));
+                    setBackImage(backCanvas.toDataURL('image/png'));
+                } catch (error) {
+                    console.error("Error generating images:", error);
+                }
+            }
+        };
+
+        generateImages();
+    }, [businessInfo, selectedTemplate]);
 
     const handleChange = (e) => {
         if (e.target.name === 'logo') {
@@ -70,33 +94,21 @@ const BusinessCard = () => {
         setBusinessInfo({ ...businessInfo, backFont: e.target.value });
     };
 
-    const getTemplateStyles = (template) => {
+    const getTemplateStyles = (template, isFront) => {
         if (template === 'template1') {
             return { backgroundColor: 'white', color: 'black' };
         }
+        if (template === 'template4') {
+            return { backgroundColor: isFront ? 'white' : 'black', color: isFront ? 'black' : 'white' };
+        }
+        if (template === 'template2') {
+            return { backgroundColor: 'white', color: 'blue' };
+        }
         switch (template) {
-            case 'template2':
-                return { backgroundColor: '#fce4ec', color: '#880e4f' };
             case 'template3':
                 return { backgroundColor: '#e8f5e9', color: '#1b5e20' };
-            case 'template4':
-                return { backgroundColor: '#fff3e0', color: '#e65100' };
             default:
                 return { backgroundColor: 'white', color: 'black' };
-        }
-    };
-
-    const generateImages = async () => {
-        if (frontCardRef.current && backCardRef.current) {
-            try {
-                const frontCanvas = await html2canvas(frontCardRef.current);
-                const backCanvas = await html2canvas(backCardRef.current);
-
-                setFrontImage(frontCanvas.toDataURL('image/png'));
-                setBackImage(backCanvas.toDataURL('image/png'));
-            } catch (error) {
-                console.error("Error generating images:", error);
-            }
         }
     };
 
@@ -110,7 +122,7 @@ const BusinessCard = () => {
     };
 
     const renderTemplatePreview = (template) => {
-        const styles = getTemplateStyles(template);
+        const styles = getTemplateStyles(template, true);
         return (
             <div className="flex flex-col items-center gap-2">
                 <label className="flex items-center">
@@ -128,7 +140,7 @@ const BusinessCard = () => {
                     <div className="border p-2 rounded-md" style={{ ...styles, width: '60px', height: '40px' }}>
                         <p className="text-xs text-center">Front</p>
                     </div>
-                    <div className="border p-2 rounded-md" style={{ ...styles, width: '60px', height: '40px' }}>
+                    <div className="border p-2 rounded-md" style={{ ...getTemplateStyles(template, false), width: '60px', height: '40px' }}>
                         <p className="text-xs text-center">Back</p>
                     </div>
                 </div>
@@ -175,16 +187,7 @@ const BusinessCard = () => {
                         </label>
                     </div>
 
-                    <div className="flex gap-4">
-                        <label className="flex items-center">
-                            <input type="radio" name="cardCorners" value="sharp" checked={businessInfo.cardCorners === 'sharp'} onChange={handleCardCornersChange} className="form-radio h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                            <span className="ml-2 text-sm">Sharp Corners</span>
-                        </label>
-                        <label className="flex items-center">
-                            <input type="radio" name="cardCorners" value="rounded" checked={businessInfo.cardCorners === 'rounded'} onChange={handleCardCornersChange} className="form-radio h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                            <span className="ml-2 text-sm">Rounded Corners</span>
-                        </label>
-                    </div>
+                   
 
                     <div className="flex justify-between">
                         {renderTemplatePreview('template1')}
@@ -212,11 +215,9 @@ const BusinessCard = () => {
                         </div>
                     </div>
 
-                    <button onClick={generateImages} className="bg-blue-500 text-white p-2 rounded">Generate Images</button>
-
                     <div className="flex flex-col items-center mt-4 border p-4 rounded-lg" style={{ backgroundColor: 'white', borderColor: 'black' }}>
                         <div className="flex gap-4">
-                            <div ref={frontCardRef} className={`border p-4 ${businessInfo.cardCorners === 'rounded' ? 'rounded-lg' : 'rounded-md'}`} style={{ ...getTemplateStyles(selectedTemplate), width: '336px', height: '210px', fontFamily: businessInfo.frontFont }}>
+                            <div ref={frontCardRef} className={`border p-4 ${businessInfo.cardCorners === 'rounded' ? 'rounded-lg' : 'rounded-md'}`} style={{ ...getTemplateStyles(selectedTemplate, true), width: '336px', height: '210px', fontFamily: businessInfo.frontFont }}>
                                 <div className="relative h-full">
                                     {selectedTemplate === 'template2' && (
                                         <div className="absolute bottom-4 left-4">
@@ -228,7 +229,7 @@ const BusinessCard = () => {
                                             <h2 className="text-2xl font-semibold">{businessInfo.name}</h2>
                                         </div>
                                     )}
-                                    {selectedTemplate !== 'template2' && selectedTemplate !== 'template3' && (
+                                    {(selectedTemplate === 'template1' || selectedTemplate === 'template4') && (
                                         <div className="flex flex-col items-center justify-center h-full">
                                             {businessInfo.frontContent === 'logo' && businessInfo.logo && <img src={businessInfo.logo ? URL.createObjectURL(businessInfo.logo) : ''} alt="Logo" className="max-w-full max-h-full" />}
                                             {businessInfo.frontContent === 'name' && <h2 className="text-2xl font-semibold">{businessInfo.name}</h2>}
@@ -243,7 +244,7 @@ const BusinessCard = () => {
                                 </div>
                             </div>
 
-                            <div ref={backCardRef} className={`border p-4 ${businessInfo.cardCorners === 'rounded' ? 'rounded-lg' : 'rounded-md'}`} style={{ ...getTemplateStyles(selectedTemplate), width: '336px', height: '210px', fontFamily: businessInfo.backFont }}>
+                            <div ref={backCardRef} className={`border p-4 ${businessInfo.cardCorners === 'rounded' ? 'rounded-lg' : 'rounded-md'}`} style={{ ...getTemplateStyles(selectedTemplate, false), width: '336px', height: '210px', fontFamily: businessInfo.backFont }}>
                                 <div className="relative h-full">
                                     {selectedTemplate === 'template2' && (
                                         <div className="absolute bottom-4 right-4 text-right">
@@ -259,11 +260,12 @@ const BusinessCard = () => {
                                             {businessInfo.qrCode && <img src={businessInfo.qrCode} alt="Website QR Code" className="w-20 mt-2" />}
                                         </div>
                                     )}
-                                    {selectedTemplate !== 'template2' && selectedTemplate !== 'template3' && (
-                                        <div className="flex flex-col justify-center h-full">
+                                    {(selectedTemplate === 'template1' || selectedTemplate === 'template4') && (
+                                        <div className="flex flex-col items-center justify-center h-full">
                                             <p>{businessInfo.phone}</p>
                                             <p>{businessInfo.address}</p>
                                             <p>{businessInfo.website}</p>
+                                            {businessInfo.qrCode && selectedTemplate === 'template4' && <img src={businessInfo.qrCode} alt="Website QR Code" className="w-20 mt-2" />}
                                         </div>
                                     )}
                                 </div>
