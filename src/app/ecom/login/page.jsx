@@ -33,58 +33,49 @@ export default function App() {
     <div className="relative w-full h-screen">
       <Spline scene="https://prod.spline.design/0wmGteug47UXdBQm/scene.splinecode" />
 
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 grid grid-cols-2 gap-4 p-8 rounded-lg bg-transparent w-96 text-black border border-black z-[99]">
-        <div className="col-span-2">
-          <h2 className="text-2xl font-semibold text-center mb-4">
-            {isLogin ? 'Login' : 'Register'}
-          </h2>
-        </div>
-
-        <div className="col-span-2">
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-2 mb-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 focus:bg-transparent border border-black border-opacity-50"
-          />
-        </div>
-
-        <div className="col-span-2">
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 mb-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 focus:bg-transparent border border-black border-opacity-50"
-          />
-        </div>
-
-        <div className="col-span-2">
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 text-black z-[99] rounded-lg border-2 border-black">
+        {/* Tabs */}
+        <div className="flex border-b-2 border-black">
           <button
-            onClick={handleLoginRegister}
-            className="w-full p-2 bg-black-500 bg-opacity-80 rounded-md hover:bg-black-600 text-black"
+            className={`flex-1 px-4 py-2 rounded-tl-lg ${isLogin ? 'border-b-2 border-blue-500' : ''}`}
+            onClick={() => setIsLogin(true)}
           >
-            {isLogin ? 'Login' : 'Register'}
+            Login
+          </button>
+          <button
+            className={`flex-1 px-4 py-2 rounded-tr-lg ${!isLogin ? 'border-b-2 border-blue-500' : ''}`}
+            onClick={() => setIsLogin(false)}
+          >
+            Register
           </button>
         </div>
 
-        <div className="col-span-2 text-center mt-2">
-          {isLogin ? (
-            <span
-              className="text-black-300 cursor-pointer"
-              onClick={() => setIsLogin(false)}
-            >
-              Register here
-            </span>
-          ) : (
-            <span
-              className="text-black-300 cursor-pointer"
-              onClick={() => setIsLogin(true)}
-            >
-              Login here
-            </span>
-          )}
+        {/* Form Content */}
+        <div className="p-8">
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full p-2 mb-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 focus:bg-transparent border border-black border-opacity-50"
+            />
+          </div>
+          <div className="mb-4">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-2 mb-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 focus:bg-transparent border border-black border-opacity-50"
+            />
+          </div>
+          <button
+            onClick={handleLoginRegister}
+            className="w-full p-2 bg-black bg-opacity-80 rounded-md hover:bg-gray-800 text-white"
+          >
+            {isLogin ? 'Login' : 'Register'}
+          </button>
         </div>
       </div>
     </div>

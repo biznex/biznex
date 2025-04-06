@@ -225,9 +225,14 @@ const JobListings = () => {
                                         <p className="mt-2 text-sm">{listing.description.substring(0, 100)}...</p>
                                         <p className="mt-2 text-sm"><strong>Qualifications:</strong> {listing.qualifications.join(', ')}</p>
                                     </div>
-                                    <button onClick={() => handleShowApplications(listing.id)} className="p-2 bg-blue-500 text-white rounded w-full sm:w-auto">
-                                        View Applications ({listing.applications.length})
-                                    </button>
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <button onClick={() => handleShowApplications(listing.id)} className="p-2 bg-blue-500 text-white rounded w-full sm:w-auto">
+                                            View Applications ({listing.applications.length})
+                                        </button>
+                                        <button onClick={() => handleDeleteJobListing(listing.id)} className="p-2 bg-red-500 text-white rounded w-full sm:w-auto">
+                                            Delete
+                                        </button>
+                                    </div>
                                 </div>
                                 {selectedJobIdForApplications === listing.id && (
                                     <div className="mt-4">
