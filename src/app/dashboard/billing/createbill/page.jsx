@@ -15,23 +15,24 @@ const CreateBill = () => {
   const videoRef = useRef(null);
   const [productSearchFocused, setProductSearchFocused] = useState(false);
   const [skuSearchFocused, setSkuSearchFocused] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const productList = [
-    { id: 1, name: 'Laptop', price: 1200.00, sku: 'LAP-001' },
-    { id: 2, name: 'Mouse', price: 25.00, sku: 'MOU-007' },
-    { id: 3, name: 'Keyboard', price: 50.00, sku: 'TBK-009' },
-    { id: 4, name: 'Monitor', price: 300.00, sku: 'MON-004' },
-    { id: 5, name: 'Headphones', price: 80.00, sku: 'HDP-004' },
-    { id: 6, name: 'Laptop Charger', price: 60.00, sku: 'LCH-006' },
-    { id: 7, name: 'Wireless Mouse', price: 35.00, sku: 'WMOU-008' },
-    { id: 8, name: 'Mechanical Keyboard', price: 100.00, sku: 'MKB-010' },
-    { id: 9, name: 'Curved Monitor', price: 450.00, sku: 'CMON-011' },
-    { id: 10, name: 'Noise-Cancelling Headphones', price: 150.00, sku: 'NCH-012' },
-    { id: 11, name: 'T-Shirt', price: 20.00, sku: 'TSH-002' },
-    { id: 12, name: 'Book', price: 15.00, sku: 'BOK-003' },
-    { id: 13, name: 'Jeans', price: 60.00, sku: 'JNS-005' },
-    { id: 14, name: 'Novel', price: 12.00, sku: 'NVL-006' },
-    { id: 15, name: 'Dress', price: 80.00, sku: 'DRS-008' },
+    { id: 1, name: 'Laptop', price: 1200.00, sku: 'LAP-001', stock: 10 },
+    { id: 2, name: 'Mouse', price: 25.00, sku: 'MOU-007', stock: 50 },
+    { id: 3, name: 'Keyboard', price: 50.00, sku: 'TBK-009', stock: 30 },
+    { id: 4, name: 'Monitor', price: 300.00, sku: 'MON-004', stock: 20 },
+    { id: 5, name: 'Headphones', price: 80.00, sku: 'HDP-004', stock: 40 },
+    { id: 6, name: 'Laptop Charger', price: 60.00, sku: 'LCH-006', stock: 25 },
+    { id: 7, name: 'Wireless Mouse', price: 35.00, sku: 'WMOU-008', stock: 35 },
+    { id: 8, name: 'Mechanical Keyboard', price: 100.00, sku: 'MKB-010', stock: 15 },
+    { id: 9, name: 'Curved Monitor', price: 450.00, sku: 'CMON-011', stock: 10 },
+    { id: 10, name: 'Noise-Cancelling Headphones', price: 150.00, sku: 'NCH-012', stock: 20 },
+    { id: 11, name: 'T-Shirt', price: 20.00, sku: 'TSH-002', stock: 60 },
+    { id: 12, name: 'Book', price: 15.00, sku: 'BOK-003', stock: 100 },
+    { id: 13, name: 'Jeans', price: 60.00, sku: 'JNS-005', stock: 30 },
+    { id: 14, name: 'Novel', price: 12.00, sku: 'NVL-006', stock: 80 },
+    { id: 15, name: 'Dress', price: 80.00, sku: 'DRS-008', stock: 40 },
   ];
 
   useEffect(() => {
@@ -72,6 +73,10 @@ const CreateBill = () => {
 
   const handleAddProduct = () => {
     if (selectedProduct) {
+      if (quantity > selectedProduct.stock) {
+        setErrorMessage(`Cannot add. Stock of ${selectedProduct.name} is ${selectedProduct.stock}.`);
+        return;
+      }
       setBillItems([
         ...billItems,
         {
@@ -86,6 +91,7 @@ const CreateBill = () => {
       setFilteredProducts([]);
       setProductSearchFocused(false);
       setSkuSearchFocused(false);
+      setErrorMessage('');
     }
   };
 
@@ -230,6 +236,13 @@ const CreateBill = () => {
           >
             Click to Scan
           </button>
+
+          {errorMessage && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+              <strong className="font-bold">Error!</strong>
+              <span className="block sm:inline"> {errorMessage}</span>
+            </div>
+          )}
 
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2">Search Product:</label>
