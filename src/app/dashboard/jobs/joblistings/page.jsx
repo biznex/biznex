@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DashboardLayout from '../../components/dashboardlayout';
 
 const JobListings = () => {
@@ -13,8 +13,8 @@ const JobListings = () => {
             location: 'Remote',
             postedDate: '2023-10-26',
             applications: [
-                { id: 101, name: 'Alice', email: 'alice@example.com' },
-                { id: 102, name: 'Bob', email: 'bob@example.com' },
+                { id: 101, name: 'Alice', email: 'alice@example.com', resume: '/resumes/alice.pdf' },
+                { id: 102, name: 'Bob', email: 'bob@example.com', resume: '/resumes/bob.pdf' },
             ],
             company: 'Tech Innovations Inc.',
             type: 'Full-time',
@@ -30,7 +30,7 @@ const JobListings = () => {
             location: 'New York',
             postedDate: '2023-10-25',
             applications: [
-                { id: 103, name: 'Charlie', email: 'charlie@example.com' },
+                { id: 103, name: 'Charlie', email: 'charlie@example.com', resume: '/resumes/charlie.pdf' },
             ],
             company: 'Marketing Solutions Group',
             type: 'Full-time',
@@ -54,6 +54,13 @@ const JobListings = () => {
     const [editingJobListingId, setEditingJobListingId] = useState(null);
     const [selectedJobIdForApplications, setSelectedJobIdForApplications] = useState(null);
     const [formErrors, setFormErrors] = useState({});
+
+    const [rejectConfirmation, setRejectConfirmation] = useState({
+        show: false,
+        jobId: null,
+        appId: null,
+    });
+    const popupRef = useRef(null);
 
     const handleJobListingChange = (e) => {
         if (e.target.name.startsWith('qualification')) {
@@ -149,6 +156,55 @@ const JobListings = () => {
         setSelectedJobIdForApplications(null);
     };
 
+    const handleRejectApplication = (jobId, appId) => {
+        setJobListings(jobListings.map(job => {
+            if (job.id === jobId) {
+                return {
+                    ...job,
+                    applications: job.applications.filter(app => app.id !== appId)
+                };
+            }
+            return job;
+        }));
+    };
+
+    const handleRejectClick = (jobId, appId) => {
+        setRejectConfirmation({ show: true, jobId, appId });
+    };
+
+    const confirmReject = () => {
+        handleRejectApplication(rejectConfirmation.jobId, rejectConfirmation.appId);
+        setRejectConfirmation({ show: false, jobId: null, appId: null });
+    };
+
+    const cancelReject = () => {
+        setRejectConfirmation({ show: false, jobId: null, appId: null });
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (popupRef.current && !popupRef.current.contains(event.target)) {
+                cancelReject();
+            }
+        };
+
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                cancelReject();
+            }
+        };
+
+        if (rejectConfirmation.show) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('keydown', handleKeyDown);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [rejectConfirmation.show]);
+
     return (
         <DashboardLayout>
             <div className="p-4 text-[#2F2F2F]">
@@ -182,6 +238,8 @@ const JobListings = () => {
                                                     <tr className="bg-gray-100">
                                                         <th className="border border-gray-300 p-2">Name</th>
                                                         <th className="border border-gray-300 p-2">Email</th>
+                                                        <th className="border border-gray-300 p-2">Resume</th>
+                                                        <th className="border border-gray-300 p-2">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -189,6 +247,12 @@ const JobListings = () => {
                                                         <tr key={app.id}>
                                                             <td className="border border-gray-300 p-2">{app.name}</td>
                                                             <td className="border border-gray-300 p-2">{app.email}</td>
+                                                            <td className="border border-gray-300 p-2">
+                                                                <a href={app.resume} target="_blank" rel="noopener noreferrer">View Resume</a>
+                                                            </td>
+                                                            <td className="border border-gray-300 p-2">
+                                                                <button onClick={() => handleRejectClick(listing.id, app.id)} className="bg-red-500 text-white rounded p-1">Reject</button>
+                                                            </td>
                                                         </tr>
                                                     ))}
                                                 </tbody>
@@ -241,6 +305,17 @@ const JobListings = () => {
                     </div>
                 </div>
             </div>
+            {rejectConfirmation.show && (
+                <div className="fixed inset-0 flex justify-center items-center">
+                    <div ref={popupRef} className="bg-white p-6 rounded-lg border border-black">
+                        <p>Are you sure you want to reject this applicant?</p>
+                        <div className="flex justify-end mt-4">
+                            <button onClick={confirmReject} className="bg-red-500 text-white rounded p-2 mr-2">Yes, Reject</button>
+                            <button onClick={cancelReject} className="bg-gray-300 rounded p-2">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 };

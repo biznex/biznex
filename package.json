@@ -24,6 +24,7 @@
     "next": "^15.2.4",
     "pdf-html": "^1.0.5",
     "pdfkit": "^0.16.0",
+    "qrcode": "^1.5.4",
     "rc-slider": "^11.1.8",
     "react": "^19.0.0",
     "react-barcode": "^1.6.1",

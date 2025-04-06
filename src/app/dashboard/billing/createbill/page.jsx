@@ -299,7 +299,10 @@ const CreateBill = () => {
             <input
               type="number"
               value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
+              onChange={(e) => {
+                const parsedValue = parseInt(e.target.value, 10);
+                setQuantity(isNaN(parsedValue) ? 1 : parsedValue);
+              }}
               min="1"
               className="w-full p-2 border rounded"
             />
