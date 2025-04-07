@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   Home,  FileText,  CreditCard,  Boxes,  LogOut,  Banknote,  ArrowLeftRight,  IndianRupee,  ChevronDown,  Package,  ChartNoAxesGantt,
-  Users,  Briefcase,  File,  Printer,  Megaphone,  IdCard,  Calculator,ShoppingCart,Key
+  Users,  Briefcase,  File,  Printer,  Megaphone,  IdCard,  Calculator,ShoppingCart,Key,ShoppingBag
 } from 'lucide-react';
 
 function DashboardSidebar() {
@@ -217,6 +217,14 @@ function DashboardSidebar() {
                   <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/ecom/subdomain') ? 'bg-[#E0E0E0]' : ''}`}>
                     <Key size={18} className="shrink-0" />
                     <span>Subdomain</span>
+                  </div>
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard/ecom/ecomproducts">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/ecom/ecomproducts') ? 'bg-[#E0E0E0]' : ''}`}>
+                    <ShoppingBag size={18} className="shrink-0" />
+                    <span>Ecom Products</span>
                   </div>
                 </Link>
               </li>
