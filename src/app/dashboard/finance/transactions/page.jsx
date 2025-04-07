@@ -7,7 +7,7 @@ import DashboardLayout from '../../components/dashboardlayout';
 
 const FinanceTransactionsPage = () => {
   const [manualTransactions, setManualTransactions] = useState([
-    { id: 1, date: '2023-10-26', description: 'Payment from Client A', amount: 500, type: 'Income' },
+    { id: 1, date: '2023-10-26', description: 'Payment from Client XYZ', amount: 500, type: 'Income' },
     { id: 2, date: '2023-10-25', description: 'Office Supplies', amount: 100, type: 'Expense' },
     { id: 3, date: '2023-10-24', description: 'Salary Payment', amount: 2000, type: 'Expense' },
   ]);
@@ -27,7 +27,7 @@ const FinanceTransactionsPage = () => {
       date: '2023-10-27',
       totalAmount: 350,
       paymentStatus: 'Paid',
-      paymentMethod: 'Credit Card',
+      paymentMethod: 'Card',
       products: [
         { name: 'Product A', unitPrice: 100, quantity: 2 },
         { name: 'Product B', unitPrice: 150, quantity: 1 },
@@ -38,7 +38,7 @@ const FinanceTransactionsPage = () => {
       date: '2023-10-28',
       totalAmount: 200,
       paymentStatus: 'Pending',
-      paymentMethod: 'PayPal',
+      paymentMethod: 'Cheque',
       products: [
         { name: 'Product C', unitPrice: 200, quantity: 1 },
       ],
