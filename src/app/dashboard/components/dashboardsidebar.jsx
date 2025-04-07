@@ -19,6 +19,7 @@ import {
   Printer,
   Megaphone,
   IdCard,
+  Calculator,
 } from 'lucide-react';
 
 function DashboardSidebar() {
@@ -114,6 +115,14 @@ function DashboardSidebar() {
                   <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/finance/salary') ? 'bg-[#E0E0E0]' : ''}`}>
                     <IndianRupee size={18} className="shrink-0" />
                     <span>Salary</span>
+                  </div>
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard/finance/taxestimate">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/finance/taxestimate') ? 'bg-[#E0E0E0]' : ''}`}>
+                    <Calculator size={18} className="shrink-0" />
+                    <span>Tax Estimate</span>
                   </div>
                 </Link>
               </li>
