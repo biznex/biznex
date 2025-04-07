@@ -2,24 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import {
-  Home,
-  FileText,
-  CreditCard,
-  Boxes,
-  LogOut,
-  Banknote,
-  ArrowLeftRight,
-  IndianRupee,
-  ChevronDown,
-  Package,
-  ChartNoAxesGantt,
-  Users,
-  Briefcase,
-  File,
-  Printer,
-  Megaphone,
-  IdCard,
-  Calculator,
+  Home,  FileText,  CreditCard,  Boxes,  LogOut,  Banknote,  ArrowLeftRight,  IndianRupee,  ChevronDown,  Package,  ChartNoAxesGantt,
+  Users,  Briefcase,  File,  Printer,  Megaphone,  IdCard,  Calculator,ShoppingCart,Key
 } from 'lucide-react';
 
 function DashboardSidebar() {
@@ -29,6 +13,7 @@ function DashboardSidebar() {
   const [showBillingSubMenu, setShowBillingSubMenu] = useState(false);
   const [showJobsSubMenu, setShowJobsSubMenu] = useState(false);
   const [showDocumentsSubMenu, setShowDocumentsSubMenu] = useState(false);
+  const [showEcomSubMenu, setShowEcomSubMenu] = useState(false);
   const [showMarketingSubMenu, setShowMarketingSubMenu] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
@@ -54,6 +39,9 @@ function DashboardSidebar() {
     }
     if (pathname.startsWith('/dashboard/documents')) {
       setShowDocumentsSubMenu(true);
+    }
+    if (pathname.startsWith('/dashboard/ecom')) {
+      setShowEcomSubMenu(true);
     }
     if (pathname.startsWith('/dashboard/marketing')) {
       setShowMarketingSubMenu(true);
@@ -211,6 +199,32 @@ function DashboardSidebar() {
             </ul>
           )}
         </li>
+
+
+        <li>
+          <div
+            className="flex items-center space-x-3 p-2 rounded cursor-pointer hover:bg-[#F0F0F0] text-inherit"
+            onClick={() => setShowEcomSubMenu(!showEcomSubMenu)}
+          >
+            <ShoppingCart size={18} className="shrink-0" />
+            <span>Ecom</span>
+            <ChevronDown size={18} className="shrink-0" />
+          </div>
+          {showEcomSubMenu && (
+            <ul className="pl-6">
+              <li>
+                <Link href="/dashboard/ecom/subdomain">
+                  <div className={`flex items-center space-x-3 p-2 rounded hover:bg-[#F0F0F0] text-inherit ${isActive('/dashboard/ecom/subdomain') ? 'bg-[#E0E0E0]' : ''}`}>
+                    <Key size={18} className="shrink-0" />
+                    <span>Subdomain</span>
+                  </div>
+                </Link>
+              </li>
+            </ul>
+          )}
+        </li>
+
+
         <li>
           <div
             className="flex items-center space-x-3 p-2 rounded cursor-pointer hover:bg-[#F0F0F0] text-inherit"
@@ -241,6 +255,7 @@ function DashboardSidebar() {
             </ul>
           )}
         </li>
+
         <li>
           <div
             className="flex items-center space-x-3 p-2 rounded cursor-pointer hover:bg-[#F0F0F0] text-inherit"
@@ -263,6 +278,10 @@ function DashboardSidebar() {
             </ul>
           )}
         </li>
+
+
+
+
         <li>
           <div
             className="flex items-center space-x-3 p-2 rounded cursor-pointer hover:bg-[#F0F0F0] text-inherit"
