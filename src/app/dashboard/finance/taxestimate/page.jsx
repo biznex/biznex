@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import DashboardLayout from "../../components/dashboardlayout";
-import { PieChart, Pie, Cell } from "recharts";
+import { PieChart, Pie, Cell, LabelList } from "recharts";
 
 const TaxEstimate = () => {
   const [businessType, setBusinessType] = useState("Presumptive Taxation (44AD)");
@@ -134,7 +134,7 @@ const TaxEstimate = () => {
   return (
     <DashboardLayout>
       <div className="p-4 text-[#2F2F2F]">
-        <h2 className="text-2xl font-bold mb-4">Business Tax Estimate Calculator</h2>
+        <h2 className="text-2xl font-bold mb-4">Complex Business Tax Estimate Calculator</h2>
 
         <div className="flex">
           <div className="w-3/4 pr-4 rounded-lg border border-black p-4">
@@ -315,14 +315,16 @@ const TaxEstimate = () => {
                     cy="50%"
                     outerRadius={60}
                     fill="#8884d8"
-                    label
                   >
+                    <LabelList dataKey="value" position="outside" stroke="#000" formatter={(value) => `₹${value.toFixed(2)}`} />
                     {pieChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                 </PieChart>
                 <p className="text-center">Tax Breakdown</p>
+
+                <div className="my-4" />
 
                 <PieChart width={250} height={150}>
                   <Pie
@@ -333,14 +335,16 @@ const TaxEstimate = () => {
                     cy="50%"
                     outerRadius={60}
                     fill="#8884d8"
-                    label
                   >
+                    <LabelList dataKey="value" position="outside" stroke="#000" formatter={(value) => `₹${value.toFixed(2)}`} />
                     {pieChartData2.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                 </PieChart>
                 <p className="text-center">Revenue/Expenses</p>
+
+                <div className="my-4" />
 
                 <PieChart width={250} height={150}>
                   <Pie
@@ -351,8 +355,8 @@ const TaxEstimate = () => {
                     cy="50%"
                     outerRadius={60}
                     fill="#8884d8"
-                    label
                   >
+                    <LabelList dataKey="value" position="outside" stroke="#000" formatter={(value) => `₹${value.toFixed(2)}`} />
                     {pieChartData3.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
