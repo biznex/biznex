@@ -31,7 +31,7 @@ const jobListings = [
   {
     id: 3,
     title: 'Data Analyst',
-    location: 'New York',
+    location: 'Los Angeles',
     type: 'Full-time',
     description: 'Analyze data to provide insights for business decisions.',
     qualifications: ['Strong analytical skills', 'Experience with SQL and Python'],
@@ -42,7 +42,7 @@ const jobListings = [
   {
     id: 4,
     title: 'Marketing Manager',
-    location: 'Los Angeles',
+    location: 'New York',
     type: 'Full-time',
     description: 'Lead marketing campaigns and brand strategy.',
     qualifications: ['Bachelor\'s degree in Marketing', '5+ years of experience'],

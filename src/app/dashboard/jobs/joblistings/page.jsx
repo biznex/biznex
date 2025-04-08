@@ -30,7 +30,11 @@ const JobListings = () => {
             location: 'New York',
             postedDate: '2023-10-25',
             applications: [
-                { id: 103, name: 'Charlie', email: 'charlie@example.com', resume: '/resumes/charlie.pdf' },
+        { "id": 103,
+        "name": "Charlie",
+        "email": "charlie@example.com",
+        "resume": "https://drive.google.com/file/d/1fUPyMiDOnz95h1SV_N9HaE1zsNnigM51/view?usp=sharing"
+      },
             ],
             company: 'Marketing Solutions Group',
             type: 'Full-time',
