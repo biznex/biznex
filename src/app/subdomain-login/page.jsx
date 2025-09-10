@@ -29,14 +29,6 @@ export default function SubdomainLoginPage() {
 
   const domainName = typeof window !== "undefined" ? window.location.hostname : "";
 
-  // Redirect if already logged in
-  useEffect(() => {
-    const token = localStorage.getItem('utoken');
-    if (token) {
-      router.replace('/subdomain'); // main dashboard
-    }
-  }, [router]);
-
   const resetForm = () => {
     setName('');
     setEmail('');
@@ -57,7 +49,7 @@ export default function SubdomainLoginPage() {
     setIsLogin(mode);
   };
 
-  // ====== API HANDLERS ======
+  // ===== API HANDLERS =====
   const handleVerifyEmail = async () => {
     if (!email || !name) return setError("Enter name and email.");
     setIsLoading(true); setError('');
@@ -142,7 +134,7 @@ export default function SubdomainLoginPage() {
       if (res.data.token) {
         localStorage.setItem('utoken', res.data.token);
         alert("Login successful!");
-        router.push('/subdomain');
+        router.push('/subdomain'); // Redirect only after successful login
       } else setError(res.data.message || "Login failed.");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed.");
@@ -168,7 +160,7 @@ export default function SubdomainLoginPage() {
     } finally { setIsLoading(false); }
   };
 
-  // ====== RENDER ======
+  // ===== RENDER =====
   return (
     <div className="w-full h-screen bg-white flex items-center justify-center">
       <div className="w-96 text-black rounded-lg border-2 border-black p-0">
@@ -182,7 +174,6 @@ export default function SubdomainLoginPage() {
           {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
 
           {isLogin ? (
-            // LOGIN FORM
             <>
               <input type="text" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2 mb-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
               <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="w-full p-2 mb-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
@@ -191,7 +182,6 @@ export default function SubdomainLoginPage() {
               </button>
             </>
           ) : (
-            // REGISTER FORM
             <>
               <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} disabled={isEmailVerified} className="w-full p-2 mb-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
               <div className="flex gap-2 mb-2">
