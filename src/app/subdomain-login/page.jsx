@@ -4,14 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from "axios";
 
-export default function App() {
-  // General State
-  const [isLogin, setIsLogin] = useState(true);
+export default function SubdomainLoginPage() {
   const router = useRouter();
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Form State
+  // General state
+  const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Form state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,19 +21,21 @@ export default function App() {
   const [phone, setPhone] = useState('');
   const [phoneOtp, setPhoneOtp] = useState('');
 
-  // Registration Flow State
+  // Verification state
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [isPhoneOtpVerified, setIsPhoneOtpVerified] = useState(false);
 
   const domainName = typeof window !== "undefined" ? window.location.hostname : "";
-  
-  // ADDED: useEffect to help debug the verification flow state
-  useEffect(() => {
-    console.log("Verification State Changed:", { isEmailVerified, isOtpVerified, isPhoneVerified, isPhoneOtpVerified });
-  }, [isEmailVerified, isOtpVerified, isPhoneVerified, isPhoneOtpVerified]);
 
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('utoken');
+    if (token) {
+      router.replace('/subdomain'); // main dashboard
+    }
+  }, [router]);
 
   const resetForm = () => {
     setName('');
@@ -53,282 +56,178 @@ export default function App() {
     resetForm();
     setIsLogin(mode);
   };
-  
-  const handleVerifyEmail = async () => {
-    if (!email || !name) {
-      setError("Please enter your name and email address.");
-      return;
-    }
-    setIsLoading(true);
-    setError('');
-    try {
-      const API_URL_VERIFY_EMAIL = `https://biznex.onrender.com/signsub/send-email-otp?subdomain=${domainName}`;
-      const response = await axios.post(API_URL_VERIFY_EMAIL, { email });
-      
-      const data= await response.data;
-      console.log("Email OTP Response:", data);
 
-      if (response.data.message == "Email OTP sent successfully.") {
-        alert("Verification code sent to your email.");
+  // ====== API HANDLERS ======
+  const handleVerifyEmail = async () => {
+    if (!email || !name) return setError("Enter name and email.");
+    setIsLoading(true); setError('');
+
+    try {
+      const res = await axios.post(
+        `https://biznex.onrender.com/signsub/send-email-otp?subdomain=${domainName}`,
+        { email }
+      );
+      if (res.data.message === "Email OTP sent successfully.") {
+        alert("Email OTP sent!");
         setIsEmailVerified(true);
-      } else {
-        setError(response.data.message || "Failed to send verification code.");
-      }
+      } else setError(res.data.message || "Failed to send OTP.");
     } catch (err) {
-      setError(err.response?.data?.message || "An error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+      setError(err.response?.data?.message || "Error sending OTP.");
+    } finally { setIsLoading(false); }
   };
 
   const handleVerifyOtp = async () => {
-    if (!otp) {
-      setError("Please enter the OTP.");
-      return;
-    }
-    setIsLoading(true);
-    setError('');
+    if (!otp) return setError("Enter OTP.");
+    setIsLoading(true); setError('');
+
     try {
-      const API_URL_VERIFY_OTP = `https://biznex.onrender.com/signsub/verify-email-otp?subdomain=${domainName}`;
-      // --- THIS IS THE FIX ---
-      // The payload key must be 'emailOtp' but the value comes from the 'otp' state.
-      const response = await axios.post(API_URL_VERIFY_OTP, { email, emailOtp: otp });
-
-      const data = await response.data;
-      console.log("OTP Verification Response:", data);
-
-      if (response.data.message == "Email verified successfully.") {
-        alert("Email OTP verified successfully!");
+      const res = await axios.post(
+        `https://biznex.onrender.com/signsub/verify-email-otp?subdomain=${domainName}`,
+        { email, emailOtp: otp }
+      );
+      if (res.data.message === "Email verified successfully.") {
+        alert("Email verified!");
         setIsOtpVerified(true);
-      } else {
-        setError(response.data.message || "Invalid OTP. Please try again.");
-      }
+      } else setError(res.data.message || "Invalid OTP.");
     } catch (err) {
-      setError(err.response?.data?.message || "An error occurred during OTP verification.");
-    } finally {
-      setIsLoading(false);
-    }
+      setError(err.response?.data?.message || "Error verifying OTP.");
+    } finally { setIsLoading(false); }
   };
 
   const handleVerifyPhone = async () => {
-    if (!phone) {
-        setError("Please enter your phone number.");
-        return;
-    }
-    setIsLoading(true);
-    setError('');
+    if (!phone) return setError("Enter phone.");
+    setIsLoading(true); setError('');
+
     try {
-        const API_URL_VERIFY_PHONE = `https://biznex.onrender.com/signsub/send-phone-otp?subdomain=${domainName}`;
-        const response = await axios.post(API_URL_VERIFY_PHONE, { email, phone });
-
-        const data = await response.data;
-        console.log("Phone OTP Response:", data);
-
-        if (response.data.message == "Phone OTP sent successfully.") {
-            alert("Verification code sent to your phone.");
-            setIsPhoneVerified(true);
-        } else {
-            setError(response.data.message || "Failed to send verification code.");
-        }
+      const res = await axios.post(
+        `https://biznex.onrender.com/signsub/send-phone-otp?subdomain=${domainName}`,
+        { email, phone }
+      );
+      if (res.data.message === "Phone OTP sent successfully.") {
+        alert("Phone OTP sent!");
+        setIsPhoneVerified(true);
+      } else setError(res.data.message || "Failed to send phone OTP.");
     } catch (err) {
-        setError(err.response?.data?.message || "An error occurred. Please try again.");
-    } finally {
-        setIsLoading(false);
-    }
+      setError(err.response?.data?.message || "Error sending phone OTP.");
+    } finally { setIsLoading(false); }
   };
 
   const handleVerifyPhoneOtp = async () => {
-    if (!phoneOtp) {
-        setError("Please enter the phone OTP.");
-        return;
-    }
-    setIsLoading(true);
-    setError('');
+    if (!phoneOtp) return setError("Enter phone OTP.");
+    setIsLoading(true); setError('');
+
     try {
-        const API_URL_VERIFY_PHONE_OTP = `https://biznex.onrender.com/signsub/verify-phone-otp?subdomain=${domainName}`;
-        const response = await axios.post(API_URL_VERIFY_PHONE_OTP, { email , phoneOtp });
-
-        const data = await response.data;
-        console.log("Phone OTP Verification Response:", data);
-
-        if (response.data.message == "Phone verified successfully.") {
-            alert("Phone number verified successfully!");
-            setIsPhoneOtpVerified(true);
-        } else {
-            setError(response.data.message || "Invalid OTP. Please try again.");
-        }
+      const res = await axios.post(
+        `https://biznex.onrender.com/signsub/verify-phone-otp?subdomain=${domainName}`,
+        { email, phoneOtp }
+      );
+      if (res.data.message === "Phone verified successfully.") {
+        alert("Phone verified!");
+        setIsPhoneOtpVerified(true);
+      } else setError(res.data.message || "Invalid phone OTP.");
     } catch (err) {
-        setError(err.response?.data?.message || "An error occurred during phone OTP verification.");
-    } finally {
-        setIsLoading(false);
-    }
+      setError(err.response?.data?.message || "Error verifying phone OTP.");
+    } finally { setIsLoading(false); }
   };
-  
+
   const handleLogin = async () => {
-    if (!email || !password) {
-        setError("Please enter both email and password.");
-        return;
-    }
-    setIsLoading(true);
-    setError('');
+    if (!email || !password) return setError("Enter email and password.");
+    setIsLoading(true); setError('');
+
     try {
-        const API_URL_LOGIN = `https://biznex.onrender.com/signsub/login?subdomain=${domainName}`;
-        const response = await axios.post(API_URL_LOGIN, { email, password });
-        
-        if (response.data.token) {
-            localStorage.setItem('utoken', response.data.token);
-            alert('Login successful');
-            router.push('../subdomain');
-        } else {
-            setError(response.data.message || "Login failed.");
-        }
+      const res = await axios.post(
+        `https://biznex.onrender.com/signsub/login?subdomain=${domainName}`,
+        { email, password }
+      );
+      if (res.data.token) {
+        localStorage.setItem('utoken', res.data.token);
+        alert("Login successful!");
+        router.push('/subdomain');
+      } else setError(res.data.message || "Login failed.");
     } catch (err) {
-        setError(err.response?.data?.message || "Login failed. Please check your credentials.");
-    } finally {
-        setIsLoading(false);
-    }
+      setError(err.response?.data?.message || "Login failed.");
+    } finally { setIsLoading(false); }
   };
 
   const handleRegister = async () => {
-    if (password !== confirmPassword) {
-        setError("Passwords do not match.");
-        return;
-    }
-    if (!password) {
-        setError("Please enter a password.");
-        return;
-    }
-    setIsLoading(true);
-    setError('');
-    try {
-        const API_URL_REGISTER = `https://biznex.onrender.com/signsub/create-user?subdomain=${domainName}`;
-        
-        // --- THIS IS THE FIX ---
-        // Ensured the 'name' field is correctly sent in the payload
-        const response = await axios.post(API_URL_REGISTER, { username: name, email, phone, password });
+    if (password !== confirmPassword) return setError("Passwords do not match.");
+    if (!password) return setError("Enter password.");
+    setIsLoading(true); setError('');
 
-        const data = await response.data;
-        console.log("Registration Response:", data);
-        
-        if (response.data.message == "Signup successful.") {
-            alert("Registration successful! Please log in.");
-            handleToggleMode(true);
-        } else {
-            setError(response.data.message || "Registration failed.");
-        }
+    try {
+      const res = await axios.post(
+        `https://biznex.onrender.com/signsub/create-user?subdomain=${domainName}`,
+        { username: name, email, phone, password }
+      );
+      if (res.data.message === "Signup successful.") {
+        alert("Registration successful! Please log in.");
+        handleToggleMode(true);
+      } else setError(res.data.message || "Registration failed.");
     } catch (err) {
-        setError(err.response?.data?.message || "An error occurred during registration.");
-    } finally {
-        setIsLoading(false);
-    }
+      setError(err.response?.data?.message || "Error registering user.");
+    } finally { setIsLoading(false); }
   };
 
+  // ====== RENDER ======
   return (
     <div className="w-full h-screen bg-white flex items-center justify-center">
       <div className="w-96 text-black rounded-lg border-2 border-black p-0">
+        {/* Mode toggle */}
         <div className="flex border-b-2 border-black">
-          <button
-            className={`flex-1 px-4 py-2 rounded-tl-lg ${isLogin ? 'border-b-2 border-[#5A43E0]' : ''}`}
-            onClick={() => handleToggleMode(true)}
-          >
-            Login
-          </button>
-          <button
-            className={`flex-1 px-4 py-2 rounded-tr-lg ${!isLogin ? 'border-b-2 border-[#5A43E0]' : ''}`}
-            onClick={() => handleToggleMode(false)}
-          >
-            Register
-          </button>
+          <button className={`flex-1 px-4 py-2 rounded-tl-lg ${isLogin ? 'border-b-2 border-[#5A43E0]' : ''}`} onClick={() => handleToggleMode(true)}>Login</button>
+          <button className={`flex-1 px-4 py-2 rounded-tr-lg ${!isLogin ? 'border-b-2 border-[#5A43E0]' : ''}`} onClick={() => handleToggleMode(false)}>Register</button>
         </div>
 
         <div className="p-8">
           {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
-          
+
           {isLogin ? (
             // LOGIN FORM
-            <div>
-              <div className="mb-4">
-                <input type="text" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-2 mb-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 focus:bg-transparent border border-black border-opacity-50" />
-              </div>
-              <div className="mb-4">
-                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-2 mb-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 focus:bg-transparent border border-black border-opacity-50" />
-              </div>
-              <button onClick={handleLogin} disabled={isLoading} className="w-full p-2 rounded-md bg-[#5A43E0] hover:bg-[#482FC1] text-white disabled:bg-gray-400">
-                {isLoading ? 'Logging in...' : 'Login'}
+            <>
+              <input type="text" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2 mb-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
+              <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="w-full p-2 mb-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
+              <button onClick={handleLogin} disabled={isLoading} className="w-full p-2 rounded-md bg-[#5A43E0] text-white">
+                {isLoading ? "Logging in..." : "Login"}
               </button>
-            </div>
+            </>
           ) : (
             // REGISTER FORM
-            <div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Full Name</label>
-                <input type="text" placeholder="Your Full Name" value={name} onChange={(e) => setName(e.target.value)} disabled={isEmailVerified} className="w-full p-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 border border-black border-opacity-50 disabled:bg-gray-100" />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Email</label>
-                <div className="flex gap-2">
-                  <input type="text" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isEmailVerified} className="w-full p-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 border border-black border-opacity-50 disabled:bg-gray-100" />
-                  {!isEmailVerified && (
-                    <button onClick={handleVerifyEmail} disabled={isLoading || !name} className="p-2 rounded-md bg-gray-600 hover:bg-gray-700 text-white text-sm disabled:bg-gray-400">
-                      {isLoading ? '...' : 'Verify'}
-                    </button>
-                  )}
-                </div>
+            <>
+              <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} disabled={isEmailVerified} className="w-full p-2 mb-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
+              <div className="flex gap-2 mb-2">
+                <input type="text" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} disabled={isEmailVerified} className="flex-1 p-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
+                {!isEmailVerified && <button onClick={handleVerifyEmail} disabled={isLoading || !name} className="p-2 rounded-md bg-gray-600 text-white">{isLoading ? "..." : "Verify"}</button>}
               </div>
 
               {isEmailVerified && !isOtpVerified && (
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Enter Email OTP</label>
-                  <div className="flex gap-2">
-                    <input type="text" placeholder="6-Digit Code" value={otp} onChange={(e) => setOtp(e.target.value)} className="w-full p-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 border border-black border-opacity-50" />
-                    <button onClick={handleVerifyOtp} disabled={isLoading} className="p-2 rounded-md bg-gray-600 hover:bg-gray-700 text-white text-sm disabled:bg-gray-400">
-                      {isLoading ? '...' : 'Verify'}
-                    </button>
-                  </div>
+                <div className="flex gap-2 mb-2">
+                  <input type="text" placeholder="Email OTP" value={otp} onChange={e => setOtp(e.target.value)} className="flex-1 p-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
+                  <button onClick={handleVerifyOtp} disabled={isLoading} className="p-2 rounded-md bg-gray-600 text-white">{isLoading ? "..." : "Verify"}</button>
                 </div>
               )}
-              
+
               {isOtpVerified && !isPhoneVerified && (
-                  <div className="mb-4">
-                      <label className="block text-sm font-medium mb-1">Phone Number</label>
-                      <div className="flex gap-2">
-                          <input type="tel" placeholder="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full p-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 border border-black border-opacity-50" />
-                          <button onClick={handleVerifyPhone} disabled={isLoading} className="p-2 rounded-md bg-gray-600 hover:bg-gray-700 text-white text-sm disabled:bg-gray-400">
-                              {isLoading ? '...' : 'Verify'}
-                          </button>
-                      </div>
-                  </div>
+                <div className="flex gap-2 mb-2">
+                  <input type="tel" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} className="flex-1 p-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
+                  <button onClick={handleVerifyPhone} disabled={isLoading} className="p-2 rounded-md bg-gray-600 text-white">{isLoading ? "..." : "Verify"}</button>
+                </div>
               )}
-              
+
               {isPhoneVerified && !isPhoneOtpVerified && (
-                  <div className="mb-4">
-                      <label className="block text-sm font-medium mb-1">Enter Phone OTP</label>
-                      <div className="flex gap-2">
-                          <input type="text" placeholder="6-Digit Code" value={phoneOtp} onChange={(e) => setPhoneOtp(e.target.value)} className="w-full p-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 border border-black border-opacity-50" />
-                          <button onClick={handleVerifyPhoneOtp} disabled={isLoading} className="p-2 rounded-md bg-gray-600 hover:bg-gray-700 text-white text-sm disabled:bg-gray-400">
-                              {isLoading ? '...' : 'Verify'}
-                          </button>
-                      </div>
-                  </div>
+                <div className="flex gap-2 mb-2">
+                  <input type="text" placeholder="Phone OTP" value={phoneOtp} onChange={e => setPhoneOtp(e.target.value)} className="flex-1 p-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
+                  <button onClick={handleVerifyPhoneOtp} disabled={isLoading} className="p-2 rounded-md bg-gray-600 text-white">{isLoading ? "..." : "Verify"}</button>
+                </div>
               )}
-              
+
               {isPhoneOtpVerified && (
                 <>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">Password</label>
-                    <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 border border-black border-opacity-50" />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">Confirm Password</label>
-                    <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full p-2 rounded-md bg-transparent text-black placeholder-black placeholder-opacity-20 border border-black border-opacity-50" />
-                  </div>
-                  <button onClick={handleRegister} disabled={isLoading || !password || password !== confirmPassword} className="w-full p-2 rounded-md bg-[#5A43E0] hover:bg-[#482FC1] text-white disabled:bg-gray-400">
-                    {isLoading ? 'Registering...' : 'Register'}
-                  </button>
+                  <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="w-full p-2 mb-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
+                  <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full p-2 mb-2 rounded-md border border-black placeholder-black placeholder-opacity-20" />
+                  <button onClick={handleRegister} disabled={isLoading || !password || password !== confirmPassword} className="w-full p-2 rounded-md bg-[#5A43E0] text-white">{isLoading ? "Registering..." : "Register"}</button>
                 </>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>
