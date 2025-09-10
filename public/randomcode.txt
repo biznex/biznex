@@ -1,0 +1,55 @@
+ {/*payment gateway*/}
+                 <div className="mt-4 p-4 border border-[#2F2F2F] rounded-xl">
+                      <h2 className="text-lg font-semibold mb-4">Pay Salaries</h2>
+                      <div className="flex flex-col md:flex-row gap-4">
+                          <div className="flex-grow">
+                              <input
+                                  type="text"
+                                  value={paySalaryEmployee}
+                                  onChange={handlePaySalaryEmployeeChange}
+                                  placeholder="Select Employee"
+                                  className="p-2 border rounded w-full text-[#2F2F2F]"
+                              />
+                              {employeeSuggestions.length > 0 && (
+                                  <ul className="border rounded mt-1 bg-white">
+                                      {employeeSuggestions.map((employee) => (
+                                          <li
+                                              key={employee}
+                                              onClick={() => {
+                                                  setPaySalaryEmployee(employee);
+                                                  setEmployeeSuggestions([]);
+                                              }}
+                                              className="p-2 hover:bg-gray-100 cursor-pointer"
+                                          >
+                                              {employee}
+                                          </li>
+                                      ))}
+                                  </ul>
+                              )}
+                          </div>
+                          <div className="flex-grow">
+                              <input
+                                  type="number"
+                                  value={paySalaryAmount}
+                                  placeholder="Salary"
+                                  className="p-2 border rounded w-full text-[#2F2F2F]"
+                                  disabled
+                              />
+                          </div>
+                          <div className="flex-grow">
+                              <input
+                                  type="text"
+                                  value={paySalaryMethod}
+                                  placeholder="Payment Method"
+                                  className="p-2 border rounded w-full text-[#2F2F2F]"
+                                  disabled
+                              />
+                          </div>
+                          <button
+                              onClick={handlePayNow}
+                              className="mt-2 md:mt-0 p-2 bg-green-500 text-white rounded"
+                          >
+                              Pay Now
+                          </button>
+                      </div>
+                  </div>
