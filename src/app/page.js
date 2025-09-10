@@ -8,10 +8,12 @@ export default function HomePage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const host = window.location.hostname;
+      const host = window.location.hostname; // e.g., www.biznex.site or store1.biznex.site
       const parts = host.split('.');
 
-      if (parts[0].toLowerCase() !== 'localhost') {
+      // Only redirect if it's a subdomain that's not "www" or "biznex"
+      const subdomain = parts[0].toLowerCase();
+      if (subdomain !== 'localhost' && subdomain !== 'www' && subdomain !== 'biznex') {
         router.push('/subdomain-login');
       }
     }
