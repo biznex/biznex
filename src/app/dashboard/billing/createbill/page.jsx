@@ -46,7 +46,7 @@ const CreateBill = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
         if (error.response && error.response.status === 401) {
-          alert("Unauthorized access,Failed to load dashboard data.. Please log in again.");
+          alert("Unauthorized access, Failed to load dashboard data.. Please log in again.");
           router.push("/login");
         } else {
           console.error("Error fetching data:", error);
@@ -72,12 +72,34 @@ const CreateBill = () => {
 
   const handleBarcodeScan = (barcode) => {
     const product = productList.find((p) => p.sku === barcode);
+
     if (product) {
+      // Product exists in product list
       setSelectedProduct(product);
       setProductSearch(product.name);
       setSkuSearch(product.sku);
+      handleAddProduct();
     } else {
-      alert("Product not found.");
+      // Add dummy product if not found
+      const dummyProduct = {
+        id: 'dummy-' + barcode,
+        name: `Scanned Product (${barcode})`,
+        price: 0,
+        sku: barcode,
+      };
+
+      setBillItems([
+        ...billItems,
+        {
+          product: dummyProduct,
+          quantity: 1,
+        },
+      ]);
+
+      setProductSearch(`Scanned Product (${barcode})`);
+      setSkuSearch(barcode);
+
+      alert(`Scanned unknown SKU: ${barcode}. Dummy product added.`);
     }
   };
 
@@ -233,7 +255,6 @@ const CreateBill = () => {
 
     try {
       const response = await axios.post("https://biznex.onrender.com/bill/cart/checkout", payload, {
-        
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -302,6 +323,7 @@ const CreateBill = () => {
               </ul>
             )}
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2">Search SKU:</label>
             <input
@@ -327,6 +349,7 @@ const CreateBill = () => {
               </ul>
             )}
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2">Quantity:</label>
             <input
@@ -337,6 +360,7 @@ const CreateBill = () => {
               className="w-full p-2 border rounded"
             />
           </div>
+
           <button
             onClick={handleAddProduct}
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
@@ -361,12 +385,12 @@ const CreateBill = () => {
               </thead>
               <tbody>
                 {billItems.map((item, index) => (
-                  <tr key={index} className="border-b">
+                  <tr key={index} className={item.product.id.startsWith('dummy-') ? 'bg-yellow-100' : ''}>
                     <td>{item.product.sku}</td>
                     <td className="p-2">{item.product.name}</td>
                     <td className="p-2">{item.quantity}</td>
                     <td className="p-2">${parseFloat(item.product.price).toFixed(2)}</td>
-                    <td className="p-2">${parseFloat(item.product.price * item.quantity).toFixed(2)}</td>
+                    <td className="p-2">${(item.product.price * item.quantity).toFixed(2)}</td>
                     <td>
                       <button
                         onClick={() => handleDeleteItem(index)}
@@ -386,11 +410,18 @@ const CreateBill = () => {
               </tfoot>
             </table>
           </div>
+
           <div className="flex justify-start mt-4">
-            <button onClick={confirmPrintBill} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">
+            <button
+              onClick={confirmPrintBill}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
+            >
               Confirm & Print Bill
             </button>
-            <button onClick={handleNewBill} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+            <button
+              onClick={handleNewBill}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            >
               New Bill
             </button>
           </div>
